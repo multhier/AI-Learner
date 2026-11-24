@@ -28,7 +28,10 @@ public class PostQueryService
         if (applyHiddenTags && currentUserId != null)
         {
             var hidden = _db.HiddenTags.Where(h => h.UserId == currentUserId).Select(h => h.TagName);
-            query = query.Where(p => !p.PostTags.Any(pt => hidden.Contains(pt.Tag.Name)));
+            // Reblog'larda asıl gönderinin etiketleri de kontrol edilir.
+            query = query.Where(p =>
+                !p.PostTags.Any(pt => hidden.Contains(pt.Tag.Name)) &&
+                (p.ReblogOf == null || !p.ReblogOf.PostTags.Any(pt => hidden.Contains(pt.Tag.Name))));
         }
 
         return await Project(query.OrderByDescending(p => p.Id).Take(PageSize), currentUserId).ToListAsync();
@@ -52,14 +55,15 @@ public class PostQueryService
     public async Task<List<TagCount>> GetTrendingTagsAsync(int days = 30, int take = 12)
     {
         var since = DateTime.UtcNow.AddDays(-days);
-        return await _db.PostTags
+        var rows = await _db.PostTags
             .Where(pt => pt.Post.CreatedAt >= since)
             .GroupBy(pt => pt.Tag.Name)
-            .Select(g => new TagCount(g.Key, g.Count()))
+            .Select(g => new { Name = g.Key, Count = g.Count() })
             .OrderByDescending(t => t.Count)
             .ThenBy(t => t.Name)
             .Take(take)
             .ToListAsync();
+        return rows.Select(r => new TagCount(r.Name, r.Count)).ToList();
     }
 
     private static IQueryable<PostCardViewModel> Project(IQueryable<Post> query, string? me) =>
