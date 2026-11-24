@@ -3,7 +3,7 @@
     ViewData["Title"] = "Yeni gönderi";
     var types = new (PostType Type, string Label)[]
     {
-        (PostType.Text, "Metin"), (PostType.Photo, "Fotoğraf"), (PostType.Quote, "Alıntı"), (PostType.Link, "Bağlantı")
+        (PostType.Text, "Metin"), (PostType.Photo, "Fotoğraf"), (PostType.Video, "Video"), (PostType.Quote, "Alıntı"), (PostType.Link, "Bağlantı")
     };
 }
 
@@ -34,6 +34,17 @@
                             <div class="form-text">JPG, PNG, GIF veya WEBP · en fazla 5 MB</div>
                             <span asp-validation-for="Image" class="text-danger"></span>
                             <img id="imagePreview" class="post-image mt-3 d-none" alt="Önizleme" />
+                        </div>
+                    }
+
+                    @if (Model.Type == PostType.Video)
+                    {
+                        <div class="mb-3">
+                            <label asp-for="Video" class="form-label"></label>
+                            <input asp-for="Video" type="file" class="form-control" accept="video/mp4,video/webm" />
+                            <div class="form-text">MP4 veya WEBM · en fazla 50 MB</div>
+                            <span asp-validation-for="Video" class="text-danger"></span>
+                            <video id="videoPreview" class="post-video mt-3 d-none" controls muted></video>
                         </div>
                     }
 

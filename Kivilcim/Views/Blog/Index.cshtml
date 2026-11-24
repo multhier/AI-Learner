@@ -28,12 +28,15 @@
                 }
                 else if (User.Identity?.IsAuthenticated == true)
                 {
-                    <form method="post" action="/blog/@Model.BlogName/follow">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-sm @(Model.IsFollowing ? "btn-outline-secondary" : "btn-spark")">
-                            @(Model.IsFollowing ? "Takibi bırak" : "Takip et")
-                        </button>
-                    </form>
+                    <div class="d-flex justify-content-center gap-2">
+                        <form method="post" action="/blog/@Model.BlogName/follow">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm @(Model.IsFollowing ? "btn-outline-secondary" : "btn-spark")">
+                                @(Model.IsFollowing ? "Takibi bırak" : "Takip et")
+                            </button>
+                        </form>
+                        <a href="/messages/@Model.BlogName" class="btn btn-sm btn-outline-spark">✉ Mesaj gönder</a>
+                    </div>
                 }
                 else
                 {

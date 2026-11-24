@@ -124,3 +124,37 @@ main .tag-pill { color: var(--spark-dark) !important; }
 main .tag-pill:hover { color: #fff !important; }
 main .post-tags .tag { color: var(--muted) !important; }
 main .post-tags .tag:hover { color: var(--spark) !important; }
+
+/* Video gönderisi */
+.post-video { width: 100%; border-radius: 8px; display: block; background: #000; max-height: 70vh; }
+
+/* Üst menü simgeleri ve sayaçları */
+.nav-icon { position: relative; font-size: 1.15rem; }
+.nav-badge { position: absolute; top: 2px; right: -4px; font-size: .62rem; padding: .2em .45em; }
+@media (max-width: 767.98px) { .nav-badge { position: static; margin-left: .25rem; } }
+
+/* Bildirim ve konuşma listeleri */
+.list-group-item.unread { background: var(--spark-soft); }
+.list-group-item a:hover strong { color: var(--spark-dark); }
+
+/* Sohbet */
+.chat-card .chat-body { height: 60vh; overflow-y: auto; background: #f5f7fb; display: flex; flex-direction: column; gap: .4rem; }
+.bubble-row { display: flex; }
+.bubble-row.mine { justify-content: flex-end; }
+.bubble {
+  max-width: 78%; padding: .5rem .75rem; border-radius: 16px; line-height: 1.4;
+  word-wrap: break-word; background: #fff; box-shadow: 0 1px 1px rgba(0,0,0,.06);
+}
+.bubble-row.mine .bubble { background: var(--spark); color: #fff; border-bottom-right-radius: 4px; }
+.bubble-row.theirs .bubble { border-bottom-left-radius: 4px; }
+.bubble-time { display: block; font-size: .7rem; opacity: .7; text-align: right; margin-top: .15rem; }
+
+/* Bildirim balonu */
+.toast-body { color: var(--text) !important; }
+
+/* Giriş / kayıt kartları */
+.auth-card { margin-top: 1rem; }
+.auth-logo { font-weight: 800; font-size: 1.6rem; letter-spacing: -.02em; }
+main .card a.auth-link { color: var(--spark-dark); font-weight: 600; }
+main .card .nav-pills .nav-link.text-danger { color: #dc3545 !important; }
+main .card dd a { color: var(--spark-dark) !important; }

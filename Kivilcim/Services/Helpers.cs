@@ -126,6 +126,47 @@ public class ImageStore
         return ($"/uploads/{folder}/{name}", null);
     }
 
+    public const long MaxVideoBytes = 50 * 1024 * 1024;
+    private static readonly string[] AllowedVideoExtensions = { ".mp4", ".webm" };
+
+    /// <summary>MP4 veya WEBM videoyu wwwroot/uploads/videos altına kaydeder.</summary>
+    public async Task<(string? Path, string? Error)> SaveVideoAsync(IFormFile file)
+    {
+        var ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!AllowedVideoExtensions.Contains(ext))
+        {
+            return (null, "Sadece MP4 veya WEBM video yükleyebilirsiniz.");
+        }
+        if (file.Length == 0 || file.Length > MaxVideoBytes)
+        {
+            return (null, "Video en fazla 50 MB olabilir.");
+        }
+        if (!await HasVideoSignatureAsync(file, ext))
+        {
+            return (null, "Dosya geçerli bir video değil.");
+        }
+
+        var dir = System.IO.Path.Combine(_env.WebRootPath, "uploads", "videos");
+        Directory.CreateDirectory(dir);
+        var name = $"{Guid.NewGuid():N}{ext}";
+        await using (var stream = File.Create(System.IO.Path.Combine(dir, name)))
+        {
+            await file.CopyToAsync(stream);
+        }
+        return ($"/uploads/videos/{name}", null);
+    }
+
+    private static async Task<bool> HasVideoSignatureAsync(IFormFile file, string ext)
+    {
+        var header = new byte[12];
+        await using var s = file.OpenReadStream();
+        var read = await s.ReadAsync(header);
+        if (read < 8) return false;
+        return ext == ".webm"
+            ? header[0] == 0x1A && header[1] == 0x45 && header[2] == 0xDF && header[3] == 0xA3   // EBML
+            : header[4] == (byte)'f' && header[5] == (byte)'t' && header[6] == (byte)'y' && header[7] == (byte)'p'; // MP4 ftyp
+    }
+
     public void Delete(string? webPath)
     {
         if (string.IsNullOrEmpty(webPath) || !webPath.StartsWith("/uploads/"))

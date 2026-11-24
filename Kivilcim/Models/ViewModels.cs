@@ -9,6 +9,7 @@ public class PostCardViewModel
     public string? Title { get; set; }
     public string? Body { get; set; }
     public string? ImagePath { get; set; }
+    public string? VideoPath { get; set; }
     public string? LinkUrl { get; set; }
     public DateTime CreatedAt { get; set; }
 
@@ -38,11 +39,15 @@ public class OriginalPostViewModel
     public string? Title { get; set; }
     public string? Body { get; set; }
     public string? ImagePath { get; set; }
+    public string? VideoPath { get; set; }
     public string? LinkUrl { get; set; }
     public string AuthorBlogName { get; set; } = "";
     public string AuthorDisplayName { get; set; } = "";
     public string? AuthorAvatar { get; set; }
 }
+
+/// <summary>_PostContent kısmi görünümüne giden gönderi içeriği.</summary>
+public record PostContentModel(PostType Type, string? Title, string? Body, string? ImagePath, string? VideoPath, string? LinkUrl);
 
 public class PostListViewModel
 {
@@ -117,6 +122,9 @@ public class CreatePostViewModel
     [Display(Name = "Görsel")]
     public IFormFile? Image { get; set; }
 
+    [Display(Name = "Video")]
+    public IFormFile? Video { get; set; }
+
     [StringLength(600)]
     [Display(Name = "Etiketler")]
     public string? Tags { get; set; }
@@ -142,4 +150,26 @@ public class ProfileSettingsViewModel
 
     public string? CurrentAvatarPath { get; set; }
     public List<string> HiddenTags { get; set; } = new();
+}
+
+public record NotificationViewModel(
+    int Id, NotificationType Type, string ActorBlogName, string ActorDisplayName, string? ActorAvatar,
+    int? PostId, string? PostPreview, bool IsRead, DateTime CreatedAt)
+{
+    public string Text => Kivilcim.Services.NotificationService.Describe(Type);
+    public string Url => PostId.HasValue ? $"/post/{PostId}" : $"/blog/{ActorBlogName}";
+}
+
+public record ConversationViewModel(
+    string BlogName, string DisplayName, string? AvatarPath, string LastMessage, bool LastFromMe,
+    DateTime LastAt, int UnreadCount);
+
+public record MessageViewModel(int Id, bool FromMe, string Body, DateTime CreatedAt);
+
+public class ThreadViewModel
+{
+    public string BlogName { get; set; } = "";
+    public string DisplayName { get; set; } = "";
+    public string? AvatarPath { get; set; }
+    public List<MessageViewModel> Messages { get; set; } = new();
 }

@@ -19,6 +19,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Follow> Follows => Set<Follow>();
     public DbSet<Reply> Replies => Set<Reply>();
     public DbSet<HiddenTag> HiddenTags => Set<HiddenTag>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<Message> Messages => Set<Message>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -40,6 +42,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             e.Property(p => p.Title).HasMaxLength(200);
             e.Property(p => p.ImagePath).HasMaxLength(300);
+            e.Property(p => p.VideoPath).HasMaxLength(300);
             e.Property(p => p.LinkUrl).HasMaxLength(2000);
             e.HasIndex(p => p.CreatedAt);
             e.HasOne(p => p.Author).WithMany(u => u.Posts)
@@ -95,6 +98,34 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             e.HasOne(h => h.User).WithMany(u => u.HiddenTags)
                 .HasForeignKey(h => h.UserId).OnDelete(DeleteBehavior.Cascade);
         });
+
+        ConfigureSocial(builder);
+    }
+
+    private static void ConfigureSocial(ModelBuilder builder)
+    {
+        // Bildirim: alıcı silinince cascade; aktör ve gönderi elle temizlenir (çoklu cascade yolu olmasın diye).
+        builder.Entity<Notification>(e =>
+        {
+            e.HasIndex(n => new { n.RecipientId, n.IsRead, n.Id });
+            e.HasOne(n => n.Recipient).WithMany()
+                .HasForeignKey(n => n.RecipientId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(n => n.Actor).WithMany()
+                .HasForeignKey(n => n.ActorId).OnDelete(DeleteBehavior.NoAction);
+            e.HasOne(n => n.Post).WithMany()
+                .HasForeignKey(n => n.PostId).OnDelete(DeleteBehavior.NoAction);
+        });
+
+        builder.Entity<Message>(e =>
+        {
+            e.Property(m => m.Body).HasMaxLength(4000);
+            e.HasIndex(m => new { m.SenderId, m.RecipientId, m.Id });
+            e.HasIndex(m => new { m.RecipientId, m.ReadAt });
+            e.HasOne(m => m.Sender).WithMany()
+                .HasForeignKey(m => m.SenderId).OnDelete(DeleteBehavior.NoAction);
+            e.HasOne(m => m.Recipient).WithMany()
+                .HasForeignKey(m => m.RecipientId).OnDelete(DeleteBehavior.NoAction);
+        });
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -141,6 +172,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         Replies.RemoveRange(await Replies.Where(r => r.UserId == userId).ToListAsync(ct));
         Follows.RemoveRange(await Follows
             .Where(f => f.FollowerId == userId || f.FolloweeId == userId).ToListAsync(ct));
+        Messages.RemoveRange(await Messages
+            .Where(m => m.SenderId == userId || m.RecipientId == userId).ToListAsync(ct));
+        // Kullanıcının yaptığı ya da onun gönderilerine bağlı bildirimler (alıcı olanlar cascade ile gider).
+        Notifications.RemoveRange(await Notifications
+            .Where(n => n.ActorId == userId || (n.Post != null && n.Post.AuthorId == userId)).ToListAsync(ct));
 
         // Başkalarının bu kullanıcının gönderilerinden yaptığı reblog'lar kalır, asıl gönderi bağı kopar.
         var orphanedReblogs = await Posts

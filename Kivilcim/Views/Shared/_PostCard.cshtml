@@ -24,7 +24,7 @@
         @if (Model.Original != null)
         {
             <div class="reblog-source mb-3">
-                <partial name="_PostContent" model="@((Model.Original.Type, Model.Original.Title, Model.Original.Body, Model.Original.ImagePath, Model.Original.LinkUrl))" />
+                <partial name="_PostContent" model="@(new PostContentModel(Model.Original.Type, Model.Original.Title, Model.Original.Body, Model.Original.ImagePath, Model.Original.VideoPath, Model.Original.LinkUrl))" />
                 <a href="/post/@Model.Original.Id" class="small text-muted">Asıl gönderiye git →</a>
             </div>
             @if (!string.IsNullOrEmpty(Model.Body))
@@ -37,7 +37,7 @@
         }
         else
         {
-            <partial name="_PostContent" model="@((Model.Type, Model.Title, Model.Body, Model.ImagePath, Model.LinkUrl))" />
+            <partial name="_PostContent" model="@(new PostContentModel(Model.Type, Model.Title, Model.Body, Model.ImagePath, Model.VideoPath, Model.LinkUrl))" />
         }
 
         @if (Model.Tags.Count > 0)

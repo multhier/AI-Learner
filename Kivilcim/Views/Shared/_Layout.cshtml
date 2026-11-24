@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body>
+<body data-signed-in="@(User.Identity?.IsAuthenticated == true ? "true" : "false")">
     <header class="site-header sticky-top">
         <nav class="navbar navbar-expand-md navbar-dark">
             <div class="container">
@@ -57,11 +57,17 @@
         </div>
     </footer>
 
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastArea" aria-live="polite"></div>
+
     @* JavaScript isteklerinin kullandığı CSRF token'ı *@
     <form id="antiforgery" class="d-none">@Html.AntiForgeryToken()</form>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    }
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

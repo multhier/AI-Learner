@@ -1,11 +1,28 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject Kivilcim.Data.ApplicationDbContext Db
 
 <ul class="navbar-nav align-items-md-center gap-md-2 ms-md-2">
 @if (SignInManager.IsSignedIn(User))
 {
     var me = await UserManager.GetUserAsync(User);
+    var myId = me?.Id ?? "";
+    var unreadNotifications = await Db.Notifications.CountAsync(n => n.RecipientId == myId && !n.IsRead);
+    var unreadMessages = await Db.Messages.CountAsync(m => m.RecipientId == myId && m.ReadAt == null);
+    <li class="nav-item">
+        <a class="nav-link nav-icon" href="/notifications" title="Bildirimler" aria-label="Bildirimler">
+            🔔<span class="badge rounded-pill bg-danger nav-badge @(unreadNotifications == 0 ? "d-none" : "")" id="notifBadge">@unreadNotifications</span>
+            <span class="d-md-none ms-1">Bildirimler</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link nav-icon" href="/messages" title="Mesajlar" aria-label="Mesajlar">
+            ✉<span class="badge rounded-pill bg-danger nav-badge @(unreadMessages == 0 ? "d-none" : "")" id="msgBadge">@unreadMessages</span>
+            <span class="d-md-none ms-1">Mesajlar</span>
+        </a>
+    </li>
     <li class="nav-item">
         <a class="btn btn-spark btn-sm my-1" href="/new">+ Gönderi</a>
     </li>
@@ -18,7 +35,7 @@
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
             <li><a class="dropdown-item" href="/blog/@me?.BlogName">Blogum</a></li>
             <li><a class="dropdown-item" href="/settings">Profil ayarları</a></li>
-            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">Hesap ve şifre</a></li>
+            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/ChangePassword">Şifre değiştir</a></li>
             <li><hr class="dropdown-divider"></li>
             <li>
                 <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

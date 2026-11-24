@@ -6,3 +6,4 @@ obj/
 Kivilcim/wwwroot/uploads/
 .vs/
 *.user
+.env

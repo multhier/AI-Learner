@@ -1,0 +1,35 @@
+@model ThreadViewModel
+@{
+    ViewData["Title"] = $"{Model.DisplayName} ile mesajlar";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <div class="card chat-card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <a href="/messages" class="btn btn-action" aria-label="Mesajlara dön">←</a>
+                <partial name="_Avatar" model="@((Model.AvatarPath, Model.DisplayName, 36))" />
+                <a href="/blog/@Model.BlogName" class="fw-semibold text-reset">@Model.DisplayName</a>
+                <span class="small text-muted">@@@Model.BlogName</span>
+            </div>
+            <div class="card-body chat-body" id="chatBody" data-other="@Model.BlogName">
+                @if (Model.Messages.Count == 0)
+                {
+                    <p class="text-center text-muted small my-4" id="chatEmpty">İlk mesajı sen yaz.</p>
+                }
+                @foreach (var m in Model.Messages)
+                {
+                    <div class="bubble-row @(m.FromMe ? "mine" : "theirs")">
+                        <div class="bubble">@TextFormat.Paragraphs(m.Body)<span class="bubble-time">@m.CreatedAt.ToLocalTime().ToString("HH:mm")</span></div>
+                    </div>
+                }
+            </div>
+            <div class="card-footer">
+                <form method="post" action="/messages/@Model.BlogName" class="d-flex gap-2" id="chatForm">
+                    @Html.AntiForgeryToken()
+                    <input name="body" class="form-control" maxlength="4000" placeholder="Mesaj yaz..." autocomplete="off" required />
+                    <button class="btn btn-spark" type="submit">Gönder</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

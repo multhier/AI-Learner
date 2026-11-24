@@ -1,0 +1,18 @@
+@page
+@model DeletePersonalDataModel
+@{
+    ViewData["Title"] = "Hesabı sil";
+}
+<h2 class="h5 mb-3 text-danger">Hesabı sil</h2>
+<div class="alert alert-warning">
+    Bu işlem <strong>geri alınamaz</strong>. Hesabın, tüm gönderilerin, beğenilerin, yanıtların ve mesajların kalıcı olarak silinir.
+</div>
+<form id="delete-user" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+    <div class="form-floating mb-3">
+        <input asp-for="Password" class="form-control" autocomplete="current-password" placeholder="Şifre" />
+        <label asp-for="Password"></label>
+        <span asp-validation-for="Password" class="text-danger small"></span>
+    </div>
+    <button class="btn btn-danger" type="submit" onclick="return confirm('Hesabın kalıcı olarak silinsin mi?');">Hesabımı kalıcı olarak sil</button>
+</form>

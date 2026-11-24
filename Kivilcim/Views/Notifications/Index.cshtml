@@ -1,0 +1,33 @@
+@model List<NotificationViewModel>
+@{
+    ViewData["Title"] = "Bildirimler";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <h1 class="h3 section-title mb-4">Bildirimler</h1>
+        <div class="card">
+            @if (Model.Count == 0)
+            {
+                <div class="card-body text-center text-muted py-5">Henüz bildirimin yok.</div>
+            }
+            <ul class="list-group list-group-flush">
+                @foreach (var n in Model)
+                {
+                    <li class="list-group-item notification-item @(n.IsRead ? "" : "unread")">
+                        <a href="@n.Url" class="d-flex align-items-center gap-3 text-reset text-decoration-none">
+                            <partial name="_Avatar" model="@((n.ActorAvatar, n.ActorDisplayName, 40))" />
+                            <div class="flex-grow-1 min-w-0">
+                                <div><strong>@n.ActorBlogName</strong> @n.Text</div>
+                                @if (!string.IsNullOrEmpty(n.PostPreview))
+                                {
+                                    <div class="small text-muted text-truncate">“@n.PostPreview”</div>
+                                }
+                            </div>
+                            <span class="small text-muted text-nowrap">@TextFormat.TimeAgo(n.CreatedAt)</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

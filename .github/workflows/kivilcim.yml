@@ -1,0 +1,50 @@
+name: Kivilcim CI
+
+on:
+  push:
+    branches: [kivilcim]
+    paths: ["Kivilcim/**", ".github/workflows/kivilcim.yml"]
+  pull_request:
+    paths: ["Kivilcim/**"]
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "Ci!Kivilcim2026"
+        ports: ["1433:1433"]
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Ci!Kivilcim2026' -Q 'SELECT 1' || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 12
+    defaults:
+      run:
+        working-directory: Kivilcim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Derle
+        run: dotnet build -c Release
+      - name: Yayın paketi oluştur
+        run: dotnet publish -c Release -o ../publish --no-build
+      - name: SQL Server ile başlat ve sayfaları kontrol et
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=KivilcimCI;User Id=sa;Password=Ci!Kivilcim2026;TrustServerCertificate=True"
+        run: |
+          dotnet ../publish/Kivilcim.dll --urls http://127.0.0.1:5080 > ../app.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:5080/ && break; sleep 2; done
+          for u in / /explore /blog/ayse /post/1 /tagged/kitap "/search?q=kahve" /Identity/Account/Login /Identity/Account/Register; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:5080$u")
+            echo "$u -> $code"
+            [ "$code" = "200" ] || { cat ../app.log; exit 1; }
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kivilcim-publish
+          path: publish

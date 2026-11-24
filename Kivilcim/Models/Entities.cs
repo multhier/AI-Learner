@@ -22,7 +22,8 @@ public enum PostType
     Text = 0,
     Photo = 1,
     Quote = 2,
-    Link = 3
+    Link = 3,
+    Video = 4
 }
 
 public class Post
@@ -36,6 +37,7 @@ public class Post
     public string? Title { get; set; }
     public string? Body { get; set; }
     public string? ImagePath { get; set; }
+    public string? VideoPath { get; set; }
     public string? LinkUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -99,4 +101,40 @@ public class HiddenTag
     public string UserId { get; set; } = "";
     public ApplicationUser User { get; set; } = null!;
     public string TagName { get; set; } = "";
+}
+
+public enum NotificationType
+{
+    Like = 0,
+    Reblog = 1,
+    Reply = 2,
+    Follow = 3
+}
+
+/// <summary>Bir kullanıcıya giden bildirim: "X gönderini beğendi" gibi.</summary>
+public class Notification
+{
+    public int Id { get; set; }
+    public string RecipientId { get; set; } = "";
+    public ApplicationUser Recipient { get; set; } = null!;
+    public string ActorId { get; set; } = "";
+    public ApplicationUser Actor { get; set; } = null!;
+    public NotificationType Type { get; set; }
+    public int? PostId { get; set; }
+    public Post? Post { get; set; }
+    public bool IsRead { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+/// <summary>İki kullanıcı arasındaki özel mesaj.</summary>
+public class Message
+{
+    public int Id { get; set; }
+    public string SenderId { get; set; } = "";
+    public ApplicationUser Sender { get; set; } = null!;
+    public string RecipientId { get; set; } = "";
+    public ApplicationUser Recipient { get; set; } = null!;
+    public string Body { get; set; } = "";
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? ReadAt { get; set; }
 }

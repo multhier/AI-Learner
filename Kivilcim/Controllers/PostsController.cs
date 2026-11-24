@@ -13,12 +13,14 @@ public class PostsController : Controller
     private readonly ApplicationDbContext _db;
     private readonly PostQueryService _posts;
     private readonly ImageStore _images;
+    private readonly NotificationService _notifications;
 
-    public PostsController(ApplicationDbContext db, PostQueryService posts, ImageStore images)
+    public PostsController(ApplicationDbContext db, PostQueryService posts, ImageStore images, NotificationService notifications)
     {
         _db = db;
         _posts = posts;
         _images = images;
+        _notifications = notifications;
     }
 
     private string? Me => User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -64,7 +66,8 @@ public class PostsController : Controller
     [Authorize]
     [HttpPost("/new/{type?}")]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(6 * 1024 * 1024)]
+    [RequestSizeLimit(55 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 55 * 1024 * 1024)]
     public async Task<IActionResult> Create(CreatePostViewModel model)
     {
         var title = model.Title?.Trim();
@@ -85,6 +88,9 @@ public class PostsController : Controller
             case PostType.Photo when model.Image == null:
                 ModelState.AddModelError(nameof(model.Image), "Bir görsel seçin.");
                 break;
+            case PostType.Video when model.Video == null:
+                ModelState.AddModelError(nameof(model.Video), "Bir video seçin.");
+                break;
         }
 
         string? imagePath = null;
@@ -93,6 +99,14 @@ public class PostsController : Controller
             var (path, error) = await _images.SaveAsync(model.Image, "posts");
             if (error != null) ModelState.AddModelError(nameof(model.Image), error);
             imagePath = path;
+        }
+
+        string? videoPath = null;
+        if (ModelState.IsValid && model.Type == PostType.Video && model.Video != null)
+        {
+            var (path, error) = await _images.SaveVideoAsync(model.Video);
+            if (error != null) ModelState.AddModelError(nameof(model.Video), error);
+            videoPath = path;
         }
 
         if (!ModelState.IsValid)
@@ -107,7 +121,8 @@ public class PostsController : Controller
             Title = string.IsNullOrEmpty(title) ? null : title,
             Body = string.IsNullOrEmpty(body) ? null : body,
             LinkUrl = model.Type == PostType.Link ? link : null,
-            ImagePath = imagePath
+            ImagePath = imagePath,
+            VideoPath = videoPath
         };
         await AttachTagsAsync(post, model.Tags);
         _db.Posts.Add(post);
@@ -123,7 +138,8 @@ public class PostsController : Controller
     public async Task<IActionResult> Like(int id, string? returnUrl)
     {
         var me = Me!;
-        if (!await _db.Posts.AnyAsync(p => p.Id == id)) return NotFound();
+        var authorId = await _db.Posts.Where(p => p.Id == id).Select(p => p.AuthorId).FirstOrDefaultAsync();
+        if (authorId == null) return NotFound();
 
         var existing = await _db.Likes.FindAsync(me, id);
         if (existing == null)
@@ -135,6 +151,11 @@ public class PostsController : Controller
             _db.Likes.Remove(existing);
         }
         await _db.SaveChangesAsync();
+
+        if (existing == null)
+            await _notifications.NotifyAsync(authorId, me, NotificationType.Like, id);
+        else
+            await _notifications.RetractAsync(authorId, me, NotificationType.Like, id);
 
         if (IsFetch())
         {
@@ -150,7 +171,7 @@ public class PostsController : Controller
     public async Task<IActionResult> Reblog(int id, string? comment, string? tags, string? returnUrl)
     {
         var source = await _db.Posts.AsNoTracking()
-            .Select(p => new { p.Id, p.ReblogOfId, p.Type })
+            .Select(p => new { p.Id, p.ReblogOfId, p.Type, RootAuthorId = p.ReblogOf != null ? p.ReblogOf.AuthorId : p.AuthorId })
             .FirstOrDefaultAsync(p => p.Id == id);
         if (source == null) return NotFound();
 
@@ -169,6 +190,7 @@ public class PostsController : Controller
         await AttachTagsAsync(reblog, tags);
         _db.Posts.Add(reblog);
         await _db.SaveChangesAsync();
+        await _notifications.NotifyAsync(source.RootAuthorId, Me!, NotificationType.Reblog, rootId);
 
         TempData["Message"] = "Yeniden paylaşıldı.";
         return BackTo(returnUrl, reblog.Id);
@@ -179,7 +201,8 @@ public class PostsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Reply(int id, string? body)
     {
-        if (!await _db.Posts.AnyAsync(p => p.Id == id)) return NotFound();
+        var authorId = await _db.Posts.Where(p => p.Id == id).Select(p => p.AuthorId).FirstOrDefaultAsync();
+        if (authorId == null) return NotFound();
 
         var text = body?.Trim();
         if (string.IsNullOrEmpty(text))
@@ -191,6 +214,7 @@ public class PostsController : Controller
             if (text.Length > 2000) text = text[..2000];
             _db.Replies.Add(new Reply { PostId = id, UserId = Me!, Body = text });
             await _db.SaveChangesAsync();
+            await _notifications.NotifyAsync(authorId, Me!, NotificationType.Reply, id);
         }
         return Redirect(Url.Action(nameof(Details), new { id }) + "#yanitlar");
     }
@@ -206,10 +230,12 @@ public class PostsController : Controller
 
         var reblogs = await _db.Posts.Where(p => p.ReblogOfId == id).ToListAsync();
         foreach (var r in reblogs) r.ReblogOfId = null;
+        _db.Notifications.RemoveRange(await _db.Notifications.Where(n => n.PostId == id).ToListAsync());
 
         _db.Posts.Remove(post);
         await _db.SaveChangesAsync();
         _images.Delete(post.ImagePath);
+        _images.Delete(post.VideoPath);
 
         TempData["Message"] = "Gönderi silindi.";
         var blog = await _db.Users.Where(u => u.Id == post.AuthorId).Select(u => u.BlogName).FirstAsync();

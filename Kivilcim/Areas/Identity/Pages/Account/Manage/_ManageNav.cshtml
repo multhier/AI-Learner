@@ -1,0 +1,10 @@
+@{
+    var page = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    string Active(string name) => page.EndsWith("/" + name, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<ul class="nav nav-pills flex-column gap-1">
+    <li class="nav-item"><a class="nav-link @Active("Index")" asp-page="./Index">Genel bakış</a></li>
+    <li class="nav-item"><a class="nav-link" href="/settings">Profil ve blog</a></li>
+    <li class="nav-item"><a class="nav-link @Active("ChangePassword")" asp-page="./ChangePassword">Şifre değiştir</a></li>
+    <li class="nav-item"><a class="nav-link @Active("DeletePersonalData") text-danger" asp-page="./DeletePersonalData">Hesabı sil</a></li>
+</ul>

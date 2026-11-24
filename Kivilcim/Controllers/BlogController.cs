@@ -12,11 +12,13 @@ public class BlogController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly PostQueryService _posts;
+    private readonly NotificationService _notifications;
 
-    public BlogController(ApplicationDbContext db, PostQueryService posts)
+    public BlogController(ApplicationDbContext db, PostQueryService posts, NotificationService notifications)
     {
         _db = db;
         _posts = posts;
+        _notifications = notifications;
     }
 
     private string? Me => User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -88,6 +90,11 @@ public class BlogController : Controller
                 _db.Follows.Remove(existing);
             }
             await _db.SaveChangesAsync();
+
+            if (existing == null)
+                await _notifications.NotifyAsync(targetId, me, NotificationType.Follow);
+            else
+                await _notifications.RetractAsync(targetId, me, NotificationType.Follow);
         }
 
         return !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)

@@ -1,6 +1,8 @@
 using Kivilcim.Data;
+using Kivilcim.Hubs;
 using Kivilcim.Models;
 using Kivilcim.Services;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,13 +28,29 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
         options.User.RequireUniqueEmail = true;
         options.Password.RequireNonAlphanumeric = false;
     })
+    .AddErrorDescriber<TurkishIdentityErrorDescriber>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Identity/Account/Login";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+});
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 
+// Konteynerde yeniden başlatmada oturumlar düşmesin diye anahtarlar kalıcı klasörde tutulur.
+var keysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrEmpty(keysPath))
+{
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+}
+
+builder.Services.AddSignalR();
 builder.Services.AddScoped<PostQueryService>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddSingleton<ImageStore>();
 
 var app = builder.Build();
@@ -73,5 +91,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();
