@@ -1,0 +1,16 @@
+@model PostListViewModel
+@if (Model.Posts.Count == 0 && Context.Request.Query["before"].Count == 0)
+{
+    <div class="empty-state card card-body text-center text-muted mb-4">@Model.EmptyMessage</div>
+}
+@foreach (var post in Model.Posts)
+{
+    <partial name="_PostCard" model="post" />
+}
+@if (Model.NextPageUrl != null)
+{
+    <div class="load-more text-center mb-4">
+        <a href="@Model.NextPageUrl"
+           class="btn btn-outline-light load-more-btn">Daha fazla göster</a>
+    </div>
+}

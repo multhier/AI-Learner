@@ -1,0 +1,34 @@
+@model ExploreViewModel
+@{
+    ViewData["Title"] = Model.Heading;
+}
+
+<div class="row justify-content-center g-4">
+    <div class="col-lg-7 col-xl-6">
+        <h1 class="h3 section-title mb-1">@Model.Heading</h1>
+        @if (Model.Tag == null && Model.Query == null)
+        {
+            <p class="text-muted mb-4">Son 30 günün en çok beğenilen ve yeniden paylaşılan gönderileri.</p>
+        }
+        else if (Model.Tag != null && User.Identity?.IsAuthenticated == true)
+        {
+            <form method="post" action="/settings/hidden-tags" class="mb-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="tag" value="@Model.Tag" />
+                <button class="btn btn-sm btn-outline-secondary" type="submit">Bu etiketi akışımda gizle</button>
+            </form>
+        }
+        else
+        {
+            <div class="mb-4"></div>
+        }
+
+        <div class="post-list">
+            <partial name="_PostList" model="Model.Results" />
+        </div>
+    </div>
+
+    <aside class="col-lg-4 col-xl-3">
+        <partial name="_TrendingTags" model="Model.TrendingTags" />
+    </aside>
+</div>

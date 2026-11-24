@@ -1,0 +1,50 @@
+@model BlogViewModel
+@{
+    ViewData["Title"] = Model.DisplayName;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <section class="blog-header card mb-4 text-center">
+            <div class="blog-cover"></div>
+            <div class="card-body pt-0">
+                <div class="blog-avatar">
+                    <partial name="_Avatar" model="@((Model.AvatarPath, Model.DisplayName, 96))" />
+                </div>
+                <h1 class="h3 mt-2 mb-0">@Model.DisplayName</h1>
+                <div class="text-muted mb-2">@@@Model.BlogName</div>
+                @if (!string.IsNullOrEmpty(Model.Bio))
+                {
+                    <p class="mb-3">@Model.Bio</p>
+                }
+                <div class="d-flex justify-content-center gap-4 small mb-3">
+                    <span><strong>@Model.PostCount</strong> gönderi</span>
+                    <span><strong>@Model.FollowerCount</strong> takipçi</span>
+                    <span><strong>@Model.FollowingCount</strong> takip</span>
+                </div>
+                @if (Model.IsMe)
+                {
+                    <a href="/settings" class="btn btn-outline-secondary btn-sm">Profili düzenle</a>
+                }
+                else if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form method="post" action="/blog/@Model.BlogName/follow">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm @(Model.IsFollowing ? "btn-outline-secondary" : "btn-spark")">
+                            @(Model.IsFollowing ? "Takibi bırak" : "Takip et")
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn btn-spark btn-sm" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/blog/@Model.BlogName">Takip etmek için giriş yap</a>
+                }
+                <div class="small text-muted mt-3">Katılım: @Model.JoinedAt.ToLocalTime().ToString("MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</div>
+            </div>
+        </section>
+
+        <div class="post-list">
+            <partial name="_PostList" model="Model.Posts" />
+        </div>
+    </div>
+</div>

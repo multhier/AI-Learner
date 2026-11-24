@@ -1,0 +1,19 @@
+@model List<TagCount>
+<section class="card side-card mb-4">
+    <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted mb-3">Popüler etiketler</h2>
+        @if (Model.Count == 0)
+        {
+            <p class="text-muted small mb-0">Henüz etiket yok.</p>
+        }
+        else
+        {
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var tag in Model)
+                {
+                    <a href="/tagged/@Uri.EscapeDataString(tag.Name)" class="tag-pill">#@tag.Name <span class="opacity-75">@tag.Count</span></a>
+                }
+            </div>
+        }
+    </div>
+</section>

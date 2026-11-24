@@ -1,0 +1,77 @@
+@model ProfileSettingsViewModel
+@{
+    ViewData["Title"] = "Profil ayarları";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <h1 class="h3 section-title mb-4">Profil ayarları</h1>
+
+        <section class="card mb-4">
+            <div class="card-body">
+                <form method="post" action="/settings" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <partial name="_Avatar" model="@((Model.CurrentAvatarPath, Model.DisplayName, 64))" />
+                        <div class="flex-grow-1">
+                            <label asp-for="Avatar" class="form-label"></label>
+                            <input asp-for="Avatar" type="file" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" />
+                            <span asp-validation-for="Avatar" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="BlogName" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">/blog/</span>
+                            <input asp-for="BlogName" class="form-control" maxlength="32" />
+                        </div>
+                        <span asp-validation-for="BlogName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DisplayName" class="form-label"></label>
+                        <input asp-for="DisplayName" class="form-control" />
+                        <span asp-validation-for="DisplayName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Bio" class="form-label"></label>
+                        <textarea asp-for="Bio" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Bio" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-spark px-4">Kaydet</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="card mb-4" id="gizli-etiketler">
+            <div class="card-body">
+                <h2 class="h5">Gizlenen etiketler</h2>
+                <p class="small text-muted">Bu etiketleri taşıyan gönderiler akışında ve aramalarda görünmez.</p>
+                <form method="post" action="/settings/hidden-tags" class="d-flex gap-2 mb-3">
+                    @Html.AntiForgeryToken()
+                    <input name="tag" class="form-control" placeholder="#etiket" maxlength="50" required />
+                    <button class="btn btn-outline-secondary" type="submit">Gizle</button>
+                </form>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var tag in Model.HiddenTags)
+                    {
+                        <form method="post" action="/settings/hidden-tags/remove">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="tag" value="@tag" />
+                            <button class="tag-pill border-0" type="submit" title="Gizlemeyi kaldır">#@tag ✕</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

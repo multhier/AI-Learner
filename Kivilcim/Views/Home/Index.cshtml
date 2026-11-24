@@ -1,0 +1,63 @@
+﻿@model HomeViewModel
+@{
+    ViewData["Title"] = Model.IsDashboard ? "Akış" : "Hoş geldin";
+}
+
+<div class="row justify-content-center g-4">
+    <div class="col-lg-7 col-xl-6">
+        @if (Model.IsDashboard)
+        {
+            <nav class="compose-bar card mb-4" aria-label="Gönderi türleri">
+                <div class="card-body d-flex justify-content-around text-center">
+                    <a href="/new/Text" class="compose-type"><span class="compose-icon">Aa</span>Metin</a>
+                    <a href="/new/Photo" class="compose-type"><span class="compose-icon">📷</span>Fotoğraf</a>
+                    <a href="/new/Quote" class="compose-type"><span class="compose-icon">❝</span>Alıntı</a>
+                    <a href="/new/Link" class="compose-type"><span class="compose-icon">🔗</span>Bağlantı</a>
+                </div>
+            </nav>
+        }
+        else
+        {
+            <section class="hero card mb-4">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="display-6 fw-bold">Aklındakini paylaş, ilgi alanlarını keşfet.</h1>
+                    <p class="lead mb-4">Kıvılcım'da yazı, fotoğraf, alıntı ve bağlantı paylaş; sevdiğin blogları takip et.</p>
+                    <a class="btn btn-spark btn-lg me-2" asp-area="Identity" asp-page="/Account/Register">Hemen kaydol</a>
+                    <a class="btn btn-outline-light btn-lg" asp-area="Identity" asp-page="/Account/Login">Giriş yap</a>
+                </div>
+            </section>
+            <h2 class="h5 section-title mb-3">Popüler gönderiler</h2>
+        }
+
+        <div class="post-list">
+            <partial name="_PostList" model="Model.Feed" />
+        </div>
+    </div>
+
+    <aside class="col-lg-4 col-xl-3">
+        @if (Model.Suggestions.Count > 0)
+        {
+            <section class="card side-card mb-4">
+                <div class="card-body">
+                    <h2 class="h6 text-uppercase text-muted mb-3">Takip edebileceğin bloglar</h2>
+                    @foreach (var s in Model.Suggestions)
+                    {
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <partial name="_Avatar" model="@((s.AvatarPath, s.DisplayName, 40))" />
+                            <div class="flex-grow-1 min-w-0">
+                                <a href="/blog/@s.BlogName" class="fw-semibold text-reset d-block text-truncate">@s.BlogName</a>
+                                <div class="small text-muted text-truncate">@s.Bio</div>
+                            </div>
+                            <form method="post" action="/blog/@s.BlogName/follow">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="returnUrl" value="/" />
+                                <button class="btn btn-sm btn-outline-spark" type="submit">Takip et</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+        <partial name="_TrendingTags" model="Model.TrendingTags" />
+    </aside>
+</div>

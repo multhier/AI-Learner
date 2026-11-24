@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav align-items-md-center gap-md-2 ms-md-2">
+@if (SignInManager.IsSignedIn(User))
+{
+    var me = await UserManager.GetUserAsync(User);
+    <li class="nav-item">
+        <a class="btn btn-spark btn-sm my-1" href="/new">+ Gönderi</a>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userMenu" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+            <partial name="_Avatar" model="@((me?.AvatarPath, me?.DisplayName ?? "?", 28))" />
+            <span class="d-md-none">@me?.DisplayName</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+            <li><a class="dropdown-item" href="/blog/@me?.BlogName">Blogum</a></li>
+            <li><a class="dropdown-item" href="/settings">Profil ayarları</a></li>
+            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">Hesap ve şifre</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button type="submit" class="dropdown-item">Çıkış yap</button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Giriş yap</a>
+    </li>
+    <li class="nav-item">
+        <a class="btn btn-spark btn-sm my-1" asp-area="Identity" asp-page="/Account/Register">Kaydol</a>
+    </li>
+}
+</ul>

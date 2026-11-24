@@ -1,0 +1,14 @@
+@model (string? Path, string Name, int Size)
+@{
+    var initial = string.IsNullOrEmpty(Model.Name) ? "?" : Model.Name.Substring(0, 1).ToUpperInvariant();
+    var hue = Math.Abs(Model.Name.Aggregate(7, (h, c) => h * 31 + c)) % 360;
+}
+@if (!string.IsNullOrEmpty(Model.Path))
+{
+    <img src="@Model.Path" alt="" class="avatar" width="@Model.Size" height="@Model.Size" />
+}
+else
+{
+    <span class="avatar avatar-initial" aria-hidden="true"
+          style="width:@(Model.Size)px;height:@(Model.Size)px;font-size:@(Model.Size / 2)px;background:hsl(@hue 55% 45%)">@initial</span>
+}
