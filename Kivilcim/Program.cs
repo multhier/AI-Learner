@@ -48,6 +48,9 @@ if (!string.IsNullOrEmpty(keysPath))
     builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysPath));
 }
 
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, SmtpEmailSender>();
+
 builder.Services.AddSignalR();
 builder.Services.AddScoped<PostQueryService>();
 builder.Services.AddScoped<NotificationService>();

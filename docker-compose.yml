@@ -27,6 +27,12 @@ services:
       ASPNETCORE_ENVIRONMENT: "Production"
       ConnectionStrings__DefaultConnection: "Server=db;Database=Kivilcim;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True"
       Database__SeedDemoData: "${SEED_DEMO_DATA:-false}"
+      # Şifremi unuttum e-postaları için SMTP (boşsa e-postalar konteyner içinde dosyaya yazılır)
+      Email__Host: "${SMTP_HOST:-}"
+      Email__Port: "${SMTP_PORT:-587}"
+      Email__UserName: "${SMTP_USER:-}"
+      Email__Password: "${SMTP_PASSWORD:-}"
+      Email__From: "${SMTP_FROM:-noreply@kivilcim.local}"
     volumes:
       - uploads:/app/wwwroot/uploads
       - keys:/app/keys

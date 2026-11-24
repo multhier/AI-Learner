@@ -23,9 +23,12 @@
                         <label asp-for="Input.Password"></label>
                         <span asp-validation-for="Input.Password" class="text-danger small"></span>
                     </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" asp-for="Input.RememberMe" />
-                        <label class="form-check-label" asp-for="Input.RememberMe"></label>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" asp-for="Input.RememberMe" />
+                            <label class="form-check-label" asp-for="Input.RememberMe"></label>
+                        </div>
+                        <a asp-page="./ForgotPassword" class="auth-link small" id="forgot-password">Şifremi unuttum</a>
                     </div>
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-spark">Giriş yap</button>
                 </form>

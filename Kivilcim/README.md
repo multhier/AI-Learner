@@ -16,7 +16,7 @@ Tumblr benzeri bir blog ve paylaşım platformu. ASP.NET Core 8 MVC, Entity Fram
 | Bildirimler | Beğeni, reblog, yanıt ve takipte SignalR ile anında bildirim; `/notifications` |
 | Mesajlaşma | Kullanıcılar arası özel mesaj, anlık iletim; `/messages` |
 | Ayarlar | Profil fotoğrafı, blog adı, görünen ad, hakkımda, gizlenen etiketler |
-| Hesap | Türkçe giriş, kayıt, şifre değiştirme ve hesap silme sayfaları |
+| Hesap | Türkçe giriş, kayıt, şifremi unuttum (e-posta ile sıfırlama), şifre değiştirme ve hesap silme |
 | Güvenlik | CSRF koruması, HTML kaçışı, görsel türü ve imza kontrolü, sahiplik kontrolü |
 
 ## Kendi bilgisayarında çalıştırma (Windows + Visual Studio)
@@ -44,6 +44,28 @@ Server=.\SQLEXPRESS;Database=Kivilcim;Trusted_Connection=True;TrustServerCertifi
 | ayse@ornek.com | Demo1234 | /blog/ayse |
 | mehmet@ornek.com | Demo1234 | /blog/mehmet-yazar |
 | zeynep@ornek.com | Demo1234 | /blog/zeynep-kodluyor |
+
+## E-posta (SMTP) ayarı: "Şifremi unuttum" için
+
+`appsettings.json` içindeki `Email` bölümü doldurulursa sıfırlama e-postaları gerçekten gönderilir.
+`Host` boş bırakılırsa e-postalar `App_Data/mail` klasörüne `.eml` dosyası olarak kaydedilir; geliştirirken bu dosyayı açıp bağlantıya tıklayabilirsin.
+
+Gmail örneği (Google hesabında 2 adımlı doğrulama açık olmalı ve bir **uygulama şifresi** oluşturulmalı):
+
+```json
+"Email": {
+  "Host": "smtp.gmail.com",
+  "Port": 587,
+  "EnableSsl": true,
+  "UserName": "adresin@gmail.com",
+  "Password": "uygulama-sifresi",
+  "From": "adresin@gmail.com",
+  "FromName": "Kıvılcım"
+}
+```
+
+Şifreyi `appsettings.json` içine yazmak yerine Visual Studio'da projeye sağ tıklayıp **Manage User Secrets** ile saklamak daha güvenlidir.
+Outlook/Hotmail için `smtp-mail.outlook.com`, port 587 kullanılır.
 
 ## Komut satırından
 
@@ -96,5 +118,4 @@ wwwroot/       site.css, site.js, yüklenen görseller (uploads/)
 ## Notlar
 
 - Yüklenen görseller `wwwroot/uploads` klasörüne kaydedilir. Canlı ortamda Azure Blob veya S3 gibi bir depolamaya taşımak önerilir.
-- "Şifremi unuttum" özelliği için e-posta gönderimi (SMTP) gerekir; henüz eklenmedi.
 - Test amaçlı SQLite ile de çalışır: `Database__Provider=Sqlite` ve `ConnectionStrings__DefaultConnection="Data Source=kivilcim.db"` ortam değişkenleri.

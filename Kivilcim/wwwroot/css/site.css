@@ -158,3 +158,8 @@ main .post-tags .tag:hover { color: var(--spark) !important; }
 main .card a.auth-link { color: var(--spark-dark); font-weight: 600; }
 main .card .nav-pills .nav-link.text-danger { color: #dc3545 !important; }
 main .card dd a { color: var(--spark-dark) !important; }
+
+/* Doğrulama mesajlarının yeri baştan ayrılır: mesaj kaybolunca buton kaymaz,
+   böylece "hatayı düzelt → butona bas" tıklaması boşa gitmez. */
+span[data-valmsg-for] { display: block; min-height: 1.35em; }
+.validation-summary-valid { display: none; }

@@ -6,3 +6,4 @@ obj/
 wwwroot/uploads/
 .vs/
 *.user
+App_Data/
