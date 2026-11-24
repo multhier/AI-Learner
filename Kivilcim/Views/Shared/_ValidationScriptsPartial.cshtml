@@ -1,2 +1,8 @@
 ﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script>
+    // Alan odağını kaybedince doğrulama yapılmaz: aksi halde butona basıldığı anda
+    // hata mesajı kaybolup buton kayıyor ve tıklama boşa gidiyordu.
+    // Doğrulama gönderirken ve yazarken (hatalı alan düzeltilince) çalışmaya devam eder.
+    $.validator.setDefaults({ onfocusout: false });
+</script>
 <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
