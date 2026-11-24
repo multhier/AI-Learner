@@ -118,3 +118,9 @@ main .card a:not(.btn):not(.dropdown-item):not(.tag):not(.tag-pill) { color: inh
 main .card a.text-muted, main .card .text-muted { color: var(--muted) !important; }
 main .nav-pills .nav-link { color: var(--text) !important; }
 main .nav-pills .nav-link.active { color: #fff !important; }
+
+/* Genel bağlantı renginin etiket kutucuklarını soldurmaması için */
+main .tag-pill { color: var(--spark-dark) !important; }
+main .tag-pill:hover { color: #fff !important; }
+main .post-tags .tag { color: var(--muted) !important; }
+main .post-tags .tag:hover { color: var(--spark) !important; }
