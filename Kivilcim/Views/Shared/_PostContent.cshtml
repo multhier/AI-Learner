@@ -2,9 +2,20 @@
 @switch (Model.Type)
 {
     case PostType.Photo:
-        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        @if (Model.Images.Count > 0)
         {
-            <img src="@Model.ImagePath" alt="@(Model.Title ?? "Gönderi görseli")" class="post-image mb-3" loading="lazy" />
+            var count = Model.Images.Count;
+            <div class="photo-grid photo-grid-@(Math.Min(count, 4)) mb-3" data-count="@count">
+                @for (var i = 0; i < count; i++)
+                {
+                    var src = Model.Images[i];
+                    var external = !src.StartsWith("/");
+                    <a href="@src" target="_blank" rel="noopener noreferrer" class="photo-cell">
+                        <img src="@src" alt="@(Model.Title ?? "Gönderi görseli") @(i + 1)" class="@(count == 1 ? "post-image" : "")"
+                             loading="lazy" @(external ? "referrerpolicy=no-referrer" : "") />
+                    </a>
+                }
+            </div>
         }
         @if (!string.IsNullOrEmpty(Model.Title)) { <h2 class="post-title">@Model.Title</h2> }
         <div class="post-body">@TextFormat.Paragraphs(Model.Body)</div>

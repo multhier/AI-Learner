@@ -8,7 +8,7 @@ public class PostCardViewModel
     public PostType Type { get; set; }
     public string? Title { get; set; }
     public string? Body { get; set; }
-    public string? ImagePath { get; set; }
+    public List<string> Images { get; set; } = new();
     public string? VideoPath { get; set; }
     public string? LinkUrl { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -38,7 +38,7 @@ public class OriginalPostViewModel
     public PostType Type { get; set; }
     public string? Title { get; set; }
     public string? Body { get; set; }
-    public string? ImagePath { get; set; }
+    public List<string> Images { get; set; } = new();
     public string? VideoPath { get; set; }
     public string? LinkUrl { get; set; }
     public string AuthorBlogName { get; set; } = "";
@@ -47,7 +47,7 @@ public class OriginalPostViewModel
 }
 
 /// <summary>_PostContent kısmi görünümüne giden gönderi içeriği.</summary>
-public record PostContentModel(PostType Type, string? Title, string? Body, string? ImagePath, string? VideoPath, string? LinkUrl);
+public record PostContentModel(PostType Type, string? Title, string? Body, List<string> Images, string? VideoPath, string? LinkUrl);
 
 public class PostListViewModel
 {
@@ -119,8 +119,14 @@ public class CreatePostViewModel
     [Display(Name = "Bağlantı")]
     public string? LinkUrl { get; set; }
 
-    [Display(Name = "Görsel")]
-    public IFormFile? Image { get; set; }
+    public const int MaxImages = 30;
+
+    /// <summary>Cihazdan yüklenen görseller.</summary>
+    [Display(Name = "Görseller")]
+    public List<IFormFile> Images { get; set; } = new();
+
+    /// <summary>İnternetten eklenen görsel bağlantıları.</summary>
+    public List<string> ImageUrls { get; set; } = new();
 
     [Display(Name = "Video")]
     public IFormFile? Video { get; set; }

@@ -1,0 +1,25 @@
+@* "+ Gönderi" düğmesine basınca açılan tür seçimi. Telefonda alttan açılan panel olur. *@
+<div class="modal fade compose-modal" id="composeModal" tabindex="-1" aria-labelledby="composeModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="compose-sheet-handle d-sm-none" aria-hidden="true"></div>
+            <div class="modal-header border-0 pb-0">
+                <h2 class="modal-title h5" id="composeModalTitle">Ne paylaşmak istersin?</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <nav class="compose-options" aria-label="Gönderi türleri">
+                    <partial name="_ComposeOptions" model="@((PostType?)null)" />
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Telefonda sağ altta sabit "+" düğmesi (gönderi yazma sayfasında gizli; "Paylaş"ın üstüne binmesin) *@
+@if (ViewData["HideComposeFab"] as bool? != true)
+{
+<button type="button" class="compose-fab d-md-none" data-bs-toggle="modal" data-bs-target="#composeModal" aria-label="Gönderi oluştur">
+    <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+</button>
+}

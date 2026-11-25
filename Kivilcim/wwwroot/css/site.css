@@ -163,3 +163,156 @@ main .card dd a { color: var(--spark-dark) !important; }
    böylece "hatayı düzelt → butona bas" tıklaması boşa gitmez. */
 span[data-valmsg-for] { display: block; min-height: 1.35em; }
 .validation-summary-valid { display: none; }
+
+/* ================= Gönderi türü seçenekleri ================= */
+.compose-options { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; }
+.compose-option {
+  display: flex; flex-direction: column; align-items: center; gap: .35rem;
+  padding: .6rem .25rem; border-radius: 12px; text-decoration: none; color: var(--text) !important;
+  transition: background .15s, transform .15s;
+}
+.compose-option:hover, .compose-option:focus-visible { background: #f3f5f9; transform: translateY(-2px); }
+.compose-option-icon {
+  width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--opt); background: color-mix(in srgb, var(--opt) 12%, #fff);
+}
+.compose-option-label { font-size: .85rem; font-weight: 600; }
+
+/* Ana sayfadaki çubuk */
+.compose-options-bar { padding: .75rem; }
+
+/* Gönderi sayfasındaki küçük tür değiştirici */
+.compose-options-mini { display: flex; gap: .15rem; }
+.compose-options-mini .compose-option { padding: .25rem; }
+.compose-options-mini .compose-option-icon { width: 34px; height: 34px; background: transparent; }
+.compose-options-mini .compose-option-icon svg { width: 22px; height: 22px; }
+.compose-options-mini .compose-option-label { display: none; }
+.compose-options-mini .compose-option.active .compose-option-icon { background: color-mix(in srgb, var(--opt) 16%, #fff); }
+
+/* Seçenek penceresi; telefonda alttan açılan panel */
+.compose-modal .modal-content { border: 0; border-radius: 18px; }
+.compose-sheet-handle { width: 44px; height: 5px; border-radius: 3px; background: #d5dae2; margin: .6rem auto 0; }
+@media (max-width: 575.98px) {
+  .compose-modal .modal-dialog { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; max-width: none; min-height: 0; transform: translateY(100%); transition: transform .25s ease-out; }
+  .compose-modal.show .modal-dialog { transform: none; }
+  .compose-modal .modal-content { border-radius: 20px 20px 0 0; padding-bottom: env(safe-area-inset-bottom); }
+  .compose-modal .compose-options { grid-template-columns: repeat(3, 1fr); row-gap: 1rem; }
+}
+
+/* Telefonda sağ alttaki + düğmesi */
+.compose-fab {
+  position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 1030;
+  width: 58px; height: 58px; border-radius: 50%; border: 0; color: #fff; background: var(--spark);
+  box-shadow: 0 6px 18px rgba(255, 106, 61, .45); display: grid; place-items: center;
+}
+.compose-fab:active { transform: scale(.94); }
+
+/* ================= Gönderi düzenleyici ================= */
+.composer { overflow: visible; }
+.composer-head {
+  display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  padding: .75rem 1rem; border-bottom: 1px solid var(--line);
+}
+.composer-title {
+  display: block; width: 100%; border: 0; outline: 0; padding: 1rem 1rem .5rem;
+  font-size: 1.9rem; font-weight: 700; color: var(--text); background: transparent;
+}
+.composer-title::placeholder { color: #a3abb8; font-weight: 600; }
+.composer-body {
+  display: block; width: 100%; border: 0; outline: 0; resize: vertical; padding: .75rem 1rem;
+  font-size: 1.1rem; line-height: 1.6; color: var(--text); background: transparent; min-height: 3.5rem;
+}
+.composer-body::placeholder { color: #a3abb8; }
+.composer-quote { font-family: Georgia, "Times New Roman", serif; font-size: 1.4rem; }
+.composer-foot {
+  display: flex; justify-content: flex-end; gap: .5rem; padding: .75rem 1rem;
+  border-top: 1px solid var(--line); position: sticky; bottom: 0; background: #fff; border-radius: 0 0 12px 12px;
+}
+
+/* Fotoğraf ekleme alanı (görseldeki tasarım) */
+.photo-editor { padding: .25rem 0 0; }
+.photo-drop {
+  position: relative; display: flex; align-items: stretch; margin: .5rem 0 0;
+  background: #f3f4f6; border-top: 3px dashed #d7dbe2; border-bottom: 3px dashed #d7dbe2;
+  box-shadow: 0 -2px 0 #cfe7fb inset, 0 2px 0 #cfe7fb inset; min-height: 170px;
+}
+.photo-drop.dragging { background: #eaf4ff; border-color: #7cb7f0; }
+.photo-drop-half {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem;
+  padding: 1.5rem .5rem; color: #8f949c; background: none; border: 0; cursor: pointer; text-align: center;
+  font-size: 1.15rem; transition: color .15s, background .15s;
+}
+.photo-drop-half span { color: #5f6b7a; }
+.photo-drop-half:hover, .photo-drop-half:focus-visible { color: var(--spark); background: rgba(255, 106, 61, .05); outline: 0; }
+.photo-drop-divider { width: 2px; background: #d7dbe2; margin: 2rem 0; }
+.photo-drop-single { display: flex; border-radius: 10px; border: 3px dashed #d7dbe2; box-shadow: none; }
+.photo-clear {
+  position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 0;
+  background: #e2543f; display: none; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+.photo-editor.has-photos .photo-clear { display: grid; }
+.photo-url-row { display: flex; gap: .5rem; padding: .75rem 1rem 0; }
+.photo-previews {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; padding: .75rem 1rem 0;
+}
+.photo-previews:empty { display: none; }
+.photo-tile { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #eef1f5; }
+.photo-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-tile.broken img { opacity: .25; }
+.photo-tile.broken::after {
+  content: "Önizleme yok"; position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: .75rem; color: var(--muted); text-align: center;
+}
+.photo-tile-remove {
+  position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 50%; border: 0;
+  background: rgba(20, 25, 35, .72); color: #fff; font-size: 1.1rem; line-height: 1; display: grid; place-items: center;
+}
+.photo-tile-badge { position: absolute; left: 6px; bottom: 6px; font-size: .8rem; background: rgba(255,255,255,.85); border-radius: 6px; padding: 0 .25rem; }
+.photo-note { padding: 1rem 1rem .25rem; margin: 0; font-size: 1.05rem; line-height: 1.5; border-bottom: 2px solid #cfe7fb; }
+.photo-count { display: inline-block; margin-left: .35rem; font-size: .85rem; color: var(--muted); font-weight: 600; }
+.photo-count.full { color: #e2543f; }
+
+/* Etiket kutucukları */
+.tag-editor { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; padding: .5rem 1rem 1rem; cursor: text; }
+.tag-editor-input {
+  border: 0; outline: 0; background: #f1f3f6; border-radius: 999px; padding: .55rem 1.1rem;
+  font-size: 1.05rem; min-width: 9rem; flex: 0 1 12rem; color: var(--text);
+}
+.tag-editor-input::placeholder { color: #8f949c; }
+.tag-chip {
+  display: inline-flex; align-items: center; gap: .25rem; background: var(--spark-soft); color: var(--spark-dark);
+  border-radius: 999px; padding: .35rem .4rem .35rem .8rem; font-weight: 600; font-size: .95rem;
+}
+.tag-chip button { border: 0; background: none; color: inherit; font-size: 1.1rem; line-height: 1; padding: 0 .25rem; }
+
+/* ================= Gönderideki fotoğraf galerisi ================= */
+.photo-grid { display: grid; gap: 4px; border-radius: 8px; overflow: hidden; }
+.photo-grid-1 { grid-template-columns: 1fr; }
+.photo-grid-2 { grid-template-columns: 1fr 1fr; }
+.photo-grid-3 { grid-template-columns: 1fr 1fr; }
+.photo-grid-3 .photo-cell:first-child { grid-column: 1 / -1; }
+.photo-grid-4 { grid-template-columns: repeat(3, 1fr); }
+.photo-grid-4 .photo-cell:first-child { grid-column: 1 / -1; }
+.photo-cell { display: block; background: #eef1f5; }
+.photo-grid:not(.photo-grid-1) .photo-cell img { width: 100%; height: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.photo-grid-3 .photo-cell:first-child img, .photo-grid-4 .photo-cell:first-child img { aspect-ratio: 16 / 10; }
+.photo-grid-1 .post-image { border-radius: 0; }
+
+/* ================= Telefon uyumu ================= */
+@media (max-width: 767.98px) {
+  main.container { padding-left: 12px; padding-right: 12px; } /* Bootstrap satır payıyla (12px) aynı olmalı */
+  .composer-title { font-size: 1.6rem; }
+  .photo-previews { grid-template-columns: repeat(3, 1fr); }
+  .photo-drop-half { font-size: 1rem; padding: 1.25rem .25rem; }
+  .photo-drop-half svg { width: 52px; height: 46px; }
+  .composer-head { flex-wrap: wrap; }
+  .compose-options-mini { width: 100%; justify-content: space-between; }
+  body { padding-bottom: 76px; } /* + düğmesi içeriği örtmesin */
+}
+
+/* Telefonda reblog başlığı tek satırda kalsın */
+.post-card .card-header a span.fw-semibold, .post-card .card-header > a.small { white-space: nowrap; }
+@media (max-width: 575.98px) {
+  .reblog-label { display: none; }
+  .post-card .card-header { gap: .4rem !important; }
+}

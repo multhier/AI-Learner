@@ -179,15 +179,178 @@
         });
     }
 
-    // Fotoğraf gönderisinde seçilen görselin önizlemesi.
-    var input = document.querySelector('input[type="file"][name="Image"]');
-    var preview = document.getElementById("imagePreview");
-    if (input && preview) {
-        input.addEventListener("change", function () {
-            var file = input.files && input.files[0];
-            if (!file) { preview.classList.add("d-none"); return; }
-            preview.src = URL.createObjectURL(file);
-            preview.classList.remove("d-none");
+    // ---- Fotoğraf düzenleyici: çoklu dosya + internetten bağlantı (en fazla 30) ----
+    var editor = document.getElementById("photoEditor");
+    if (editor) {
+        var max = parseInt(editor.dataset.max, 10) || 30;
+        var fileInput = document.getElementById("Images");
+        var previews = document.getElementById("photoPreviews");
+        var urlRow = document.getElementById("urlRow");
+        var urlInput = document.getElementById("urlInput");
+        var urlInputs = document.getElementById("urlInputs");
+        var counter = document.getElementById("photoCount");
+        var drop = document.getElementById("photoDrop");
+        var files = [];   // { file, src }
+        var urls = Array.prototype.map.call(urlInputs.querySelectorAll("input"), function (i) { return i.value; });
+        var canEditFileList = typeof DataTransfer === "function";
+
+        function total() { return files.length + urls.length; }
+
+        function warn(text) { showToast("Fotoğraf", text, "#"); }
+
+        function syncInputs() {
+            if (canEditFileList) {
+                var dt = new DataTransfer();
+                files.forEach(function (f) { dt.items.add(f.file); });
+                fileInput.files = dt.files;
+            }
+            urlInputs.innerHTML = "";
+            urls.forEach(function (u) {
+                var h = document.createElement("input");
+                h.type = "hidden"; h.name = "ImageUrls"; h.value = u;
+                urlInputs.appendChild(h);
+            });
+        }
+
+        function tile(src, label, onRemove, external) {
+            var t = document.createElement("div");
+            t.className = "photo-tile" + (external ? " external" : "");
+            var img = document.createElement("img");
+            img.src = src; img.alt = label; img.loading = "lazy";
+            if (external) { img.referrerPolicy = "no-referrer"; }
+            img.onerror = function () { t.classList.add("broken"); };
+            var rm = document.createElement("button");
+            rm.type = "button"; rm.className = "photo-tile-remove"; rm.setAttribute("aria-label", label + " kaldır");
+            rm.innerHTML = "&times;";
+            rm.addEventListener("click", onRemove);
+            t.appendChild(img); t.appendChild(rm);
+            if (external) {
+                var badge = document.createElement("span");
+                badge.className = "photo-tile-badge"; badge.textContent = "🌐";
+                t.appendChild(badge);
+            }
+            return t;
+        }
+
+        function render() {
+            previews.innerHTML = "";
+            files.forEach(function (f, i) {
+                previews.appendChild(tile(f.src, f.file.name, function () {
+                    URL.revokeObjectURL(f.src); files.splice(i, 1); syncInputs(); render();
+                }, false));
+            });
+            urls.forEach(function (u, i) {
+                previews.appendChild(tile(u, "Bağlantı " + (i + 1), function () {
+                    urls.splice(i, 1); syncInputs(); render();
+                }, true));
+            });
+            counter.textContent = total() + " / " + max;
+            counter.classList.toggle("full", total() >= max);
+            editor.classList.toggle("has-photos", total() > 0);
+        }
+
+        function addFiles(list) {
+            var skipped = 0;
+            Array.prototype.forEach.call(list, function (file) {
+                if (!/^image\/(jpeg|png|gif|webp)$/.test(file.type)) { skipped++; return; }
+                if (total() >= max) { skipped++; return; }
+                files.push({ file: file, src: URL.createObjectURL(file) });
+            });
+            if (skipped) warn(skipped + " dosya eklenmedi (sadece JPG, PNG, GIF, WEBP; en fazla " + max + " resim).");
+            syncInputs(); render();
+        }
+
+        fileInput.addEventListener("change", function () {
+            if (!canEditFileList) { return; } // Eski tarayıcı: seçim olduğu gibi gönderilir.
+            var chosen = Array.prototype.slice.call(fileInput.files);
+            addFiles(chosen);
+        });
+
+        document.getElementById("pickUrl").addEventListener("click", function () {
+            urlRow.hidden = false;
+            urlInput.focus();
+        });
+
+        function addUrl() {
+            var u = urlInput.value.trim();
+            if (!u) return;
+            if (!/^https?:\/\/\S+$/i.test(u)) { warn("Geçerli bir http(s) bağlantısı gir."); return; }
+            if (urls.indexOf(u) >= 0) { warn("Bu bağlantı zaten ekli."); return; }
+            if (total() >= max) { warn("En fazla " + max + " resim ekleyebilirsin."); return; }
+            urls.push(u); urlInput.value = ""; syncInputs(); render();
+        }
+        document.getElementById("urlAdd").addEventListener("click", addUrl);
+        urlInput.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addUrl(); } });
+
+        document.getElementById("photoClear").addEventListener("click", function () {
+            files.forEach(function (f) { URL.revokeObjectURL(f.src); });
+            files = []; urls = []; urlRow.hidden = true; syncInputs(); render();
+        });
+
+        // Sürükle-bırak
+        ["dragenter", "dragover"].forEach(function (ev) {
+            drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("dragging"); });
+        });
+        ["dragleave", "drop"].forEach(function (ev) {
+            drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("dragging"); });
+        });
+        drop.addEventListener("drop", function (e) { if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+
+        render();
+    }
+
+    // ---- Etiket kutucukları: "#etiket ekle" ----
+    var tagEditor = document.getElementById("tagEditor");
+    var tagsHidden = document.getElementById("Tags");
+    if (tagEditor && tagsHidden) {
+        var tagInput = document.getElementById("tagInput");
+        var tags = [];
+        var MAX_TAGS = 10;
+
+        function normalize(t) {
+            return t.replace(/^#+/, "").replace(/\s+/g, " ").trim().toLocaleLowerCase("tr").slice(0, 50);
+        }
+        function syncTags() { tagsHidden.value = tags.join(", "); }
+        function renderTags() {
+            Array.prototype.slice.call(tagEditor.querySelectorAll(".tag-chip")).forEach(function (c) { c.remove(); });
+            tags.forEach(function (t, i) {
+                var chip = document.createElement("span");
+                chip.className = "tag-chip";
+                chip.appendChild(document.createTextNode("#" + t));
+                var x = document.createElement("button");
+                x.type = "button"; x.setAttribute("aria-label", "#" + t + " etiketini kaldır"); x.innerHTML = "&times;";
+                x.addEventListener("click", function () { tags.splice(i, 1); syncTags(); renderTags(); tagInput.focus(); });
+                chip.appendChild(x);
+                tagEditor.insertBefore(chip, tagInput);
+            });
+            tagInput.placeholder = tags.length ? "+ etiket" : "#etiket ekle";
+            tagInput.hidden = tags.length >= MAX_TAGS;
+        }
+        function addTags(text) {
+            text.split(/[,\n]/).forEach(function (raw) {
+                var t = normalize(raw);
+                if (t && tags.indexOf(t) < 0 && tags.length < MAX_TAGS) tags.push(t);
+            });
+            syncTags(); renderTags();
+        }
+
+        addTags(tagsHidden.value || "");
+        tagEditor.addEventListener("click", function (e) { if (e.target === tagEditor) tagInput.focus(); });
+        tagInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === ",") {
+                e.preventDefault();
+                addTags(tagInput.value); tagInput.value = "";
+            } else if (e.key === "Backspace" && !tagInput.value && tags.length) {
+                tags.pop(); syncTags(); renderTags();
+            }
+        });
+        tagInput.addEventListener("input", function () {
+            if (tagInput.value.indexOf(",") >= 0) { addTags(tagInput.value); tagInput.value = ""; }
+        });
+        // Not: Yazılı kalan etiket odak kaybında değil, gönderirken eklenir. Odak kaybında eklemek
+        // satırı kaydırıyor ve "Paylaş"a basma anında tıklamayı boşa düşürüyordu.
+        tagEditor.closest("form").addEventListener("submit", function () {
+            if (tagInput.value.trim()) { addTags(tagInput.value); tagInput.value = ""; }
         });
     }
 })();

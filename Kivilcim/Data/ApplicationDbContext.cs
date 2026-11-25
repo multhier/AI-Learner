@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<HiddenTag> HiddenTags => Set<HiddenTag>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<Message> Messages => Set<Message>();
+    public DbSet<PostImage> PostImages => Set<PostImage>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -41,7 +42,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Post>(e =>
         {
             e.Property(p => p.Title).HasMaxLength(200);
-            e.Property(p => p.ImagePath).HasMaxLength(300);
             e.Property(p => p.VideoPath).HasMaxLength(300);
             e.Property(p => p.LinkUrl).HasMaxLength(2000);
             e.HasIndex(p => p.CreatedAt);
@@ -100,6 +100,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         });
 
         ConfigureSocial(builder);
+
+        builder.Entity<PostImage>(e =>
+        {
+            e.Property(i => i.Url).HasMaxLength(2000);
+            e.HasIndex(i => new { i.PostId, i.SortOrder });
+            e.HasOne(i => i.Post).WithMany(p => p.Images)
+                .HasForeignKey(i => i.PostId).OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
     private static void ConfigureSocial(ModelBuilder builder)

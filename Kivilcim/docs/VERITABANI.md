@@ -1,6 +1,6 @@
 # Kıvılcım · Veritabanı Şeması
 
-Kıvılcım, **Microsoft SQL Server** üzerinde **10 uygulama tablosu** kullanır. Bunlara ASP.NET Core Identity'nin kendi tabloları (roller, oturum açma bilgileri vb.) eklenir.
+Kıvılcım, **Microsoft SQL Server** üzerinde **11 uygulama tablosu** kullanır. Bunlara ASP.NET Core Identity'nin kendi tabloları (roller, oturum açma bilgileri vb.) eklenir.
 
 ![Kıvılcım veritabanı şeması](veritabani.png)
 
@@ -19,7 +19,8 @@ Kıvılcım, **Microsoft SQL Server** üzerinde **10 uygulama tablosu** kullanı
 | Tablo | Ne saklar? | Anahtar |
 |---|---|---|
 | **AspNetUsers** | Kullanıcılar: e-posta, şifre özeti, blog adı, profil | `Id` |
-| **Posts** | Gönderiler: tür, başlık, metin, görsel, video, bağlantı | `Id` |
+| **Posts** | Gönderiler: tür, başlık, metin, video, bağlantı | `Id` |
+| **PostImages** | Fotoğraf gönderisinin resimleri (en fazla 30); yüklenen dosya ya da internet bağlantısı | `Id` |
 | **Tags** | Etiket adları (`kedi`, `yaz tatili`) | `Id` |
 | **PostTags** | Hangi gönderide hangi etiket var | `PostId` + `TagId` |
 | **Likes** | Kim hangi gönderiyi beğendi | `UserId` + `PostId` |
@@ -35,6 +36,9 @@ Kıvılcım, **Microsoft SQL Server** üzerinde **10 uygulama tablosu** kullanı
   - **Bu şu demektir:** Bir kullanıcı aynı gönderiyi **iki kez beğenemez**; veritabanı buna izin vermez.
 - **Reblog:** `Posts.ReblogOfId` yine `Posts` tablosunu gösterir (tablo kendine bağlanır).
   - Reblog'un reblog'u yapılsa bile **her zaman asıl gönderiye** bağlanır.
+- **Çoklu resim:** Bir fotoğraf gönderisinin **birden çok** resmi olabilir; bu yüzden resimler ayrı **`PostImages`** tablosunda tutulur.
+  - `IsExternal = 1` ise resim **internetten eklenmiş bir bağlantıdır**, sunucuya indirilmez.
+  - `SortOrder` resimlerin gösterilme sırasıdır.
 - **Çoka çok ilişki:** Bir gönderinin çok etiketi, bir etiketin çok gönderisi olabilir. Bu yüzden araya **`PostTags`** tablosu konuldu.
 - **Silme kuralları:** SQL Server bir tabloya giden **birden fazla otomatik silme (cascade) yolunu** kabul etmez.
   - Bu yüzden kullanıcı silinirken beğenileri, yanıtları, takipleri, mesajları ve bildirimleri **uygulama kodu** temizler (`ApplicationDbContext.SaveChangesAsync`).
@@ -48,6 +52,7 @@ Kıvılcım, **Microsoft SQL Server** üzerinde **10 uygulama tablosu** kullanı
 |---|---|
 | `InitialCreate` | Kullanıcı, gönderi, etiket, beğeni, yanıt, takip, gizli etiket tabloları |
 | `NotificationsMessagesVideo` | `Notifications` ve `Messages` tabloları, `Posts.VideoPath` sütunu |
+| `PostImagesGallery` | `PostImages` tablosu; eski gönderilerin tek resmi bu tabloya taşındı, `Posts.ImagePath` kaldırıldı |
 
 ## Metin Olarak Şema (Mermaid)
 
@@ -57,6 +62,7 @@ GitHub bu bölümü otomatik olarak diyagrama çevirir.
 erDiagram
     AspNetUsers ||--o{ Posts : "yazar"
     Posts |o--o{ Posts : "reblog"
+    Posts ||--o{ PostImages : "resimleri"
     Posts ||--o{ PostTags : "etiketlenir"
     Tags ||--o{ PostTags : "kullanilir"
     AspNetUsers ||--o{ Likes : "begenir"
@@ -89,11 +95,17 @@ erDiagram
         int Type "0 Metin 1 Foto 2 Alinti 3 Link 4 Video"
         nvarchar(200) Title
         nvarchar(max) Body
-        nvarchar(300) ImagePath
         nvarchar(300) VideoPath
         nvarchar(2000) LinkUrl
         int ReblogOfId FK "asil gonderi"
         datetime2 CreatedAt
+    }
+    PostImages {
+        int Id PK
+        int PostId FK
+        nvarchar(2000) Url "dosya yolu ya da internet adresi"
+        bit IsExternal
+        int SortOrder
     }
     Tags {
         int Id PK

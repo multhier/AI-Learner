@@ -57,6 +57,11 @@
         </div>
     </footer>
 
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <partial name="_ComposeModal" />
+    }
+
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastArea" aria-live="polite"></div>
 
     @* JavaScript isteklerinin kullandığı CSRF token'ı *@

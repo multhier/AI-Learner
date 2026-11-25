@@ -8,12 +8,8 @@
         @if (Model.IsDashboard)
         {
             <nav class="compose-bar card mb-4" aria-label="Gönderi türleri">
-                <div class="card-body d-flex justify-content-around text-center">
-                    <a href="/new/Text" class="compose-type"><span class="compose-icon">Aa</span>Metin</a>
-                    <a href="/new/Photo" class="compose-type"><span class="compose-icon">📷</span>Fotoğraf</a>
-                    <a href="/new/Video" class="compose-type"><span class="compose-icon">🎬</span>Video</a>
-                    <a href="/new/Quote" class="compose-type"><span class="compose-icon">❝</span>Alıntı</a>
-                    <a href="/new/Link" class="compose-type"><span class="compose-icon">🔗</span>Bağlantı</a>
+                <div class="card-body compose-options compose-options-bar">
+                    <partial name="_ComposeOptions" model="@((PostType?)null)" />
                 </div>
             </nav>
         }

@@ -48,8 +48,10 @@ public class DeletePersonalDataModel : PageModel
         }
 
         // Diskteki dosyaları silebilmek için yolları önceden topla.
-        var files = _db.Posts.Where(p => p.AuthorId == user.Id)
-            .Select(p => new { p.ImagePath, p.VideoPath }).ToList();
+        var videos = _db.Posts.Where(p => p.AuthorId == user.Id && p.VideoPath != null)
+            .Select(p => p.VideoPath).ToList();
+        var images = _db.PostImages.Where(i => i.Post.AuthorId == user.Id && !i.IsExternal)
+            .Select(i => i.Url).ToList();
 
         var result = await _userManager.DeleteAsync(user);
         if (!result.Succeeded)
@@ -58,10 +60,9 @@ public class DeletePersonalDataModel : PageModel
             return Page();
         }
 
-        foreach (var f in files)
+        foreach (var path in videos.Concat(images))
         {
-            _files.Delete(f.ImagePath);
-            _files.Delete(f.VideoPath);
+            _files.Delete(path);
         }
         _files.Delete(user.AvatarPath);
 

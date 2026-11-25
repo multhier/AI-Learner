@@ -11,7 +11,7 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", Inter, Arial, sans-serif; }
-  #canvas { position: relative; width: 1760px; height: 1130px; margin: 0 auto; }
+  #canvas { position: relative; width: 1760px; height: 1160px; margin: 0 auto; }
   h1 { position: absolute; left: 40px; top: 18px; margin: 0; font-size: 30px; }
   h1 small { font-size: 16px; font-weight: 400; color: var(--muted); margin-left: 8px; }
   svg#wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -42,7 +42,7 @@
 </head>
 <body>
 <div id="canvas">
-  <h1>✦ Kıvılcım · Veritabanı Şeması <small>Microsoft SQL Server · 10 uygulama tablosu</small></h1>
+  <h1>✦ Kıvılcım · Veritabanı Şeması <small>Microsoft SQL Server · 11 uygulama tablosu</small></h1>
   <svg id="wires"></svg>
 
   <!-- 1. satır -->
@@ -109,14 +109,23 @@
       <tr><td class="k"></td><td>Type <span class="note">metin/foto/alıntı/link/video</span></td><td class="t">int</td></tr>
       <tr><td class="k"></td><td>Title</td><td class="t">nvarchar(200)</td></tr>
       <tr><td class="k"></td><td>Body</td><td class="t">nvarchar(max)</td></tr>
-      <tr><td class="k"></td><td>ImagePath</td><td class="t">nvarchar(300)</td></tr>
       <tr><td class="k"></td><td>VideoPath</td><td class="t">nvarchar(300)</td></tr>
       <tr><td class="k"></td><td>LinkUrl</td><td class="t">nvarchar(2000)</td></tr>
       <tr><td class="k fk">FK</td><td>ReblogOfId <span class="note">asıl gönderi</span></td><td class="t">int</td></tr>
       <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
     </table>
   </div>
-  <div class="card" id="PostTags" style="--c:var(--tag);left:1360px;top:540px">
+  <div class="card" id="PostImages" style="--c:var(--content);left:1360px;top:430px">
+    <header>PostImages <span>gönderi resimleri (en fazla 30)</span></header>
+    <table>
+      <tr><td class="k pk">PK</td><td>Id</td><td class="t">int</td></tr>
+      <tr><td class="k fk">FK</td><td>PostId</td><td class="t">int</td></tr>
+      <tr><td class="k"></td><td>Url <span class="note">dosya ya da bağlantı</span></td><td class="t">nvarchar(2000)</td></tr>
+      <tr><td class="k"></td><td>IsExternal <span class="note">internetten mi?</span></td><td class="t">bit</td></tr>
+      <tr><td class="k"></td><td>SortOrder <span class="note">sıra</span></td><td class="t">int</td></tr>
+    </table>
+  </div>
+  <div class="card" id="PostTags" style="--c:var(--tag);left:1360px;top:690px">
     <header>PostTags <span>gönderi ↔ etiket</span></header>
     <table>
       <tr><td class="k pk">PK FK</td><td>PostId</td><td class="t">int</td></tr>
@@ -143,7 +152,7 @@
       <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
     </table>
   </div>
-  <div class="card" id="Tags" style="--c:var(--tag);left:1360px;top:860px">
+  <div class="card" id="Tags" style="--c:var(--tag);left:1360px;top:900px">
     <header>Tags <span>etiketler</span></header>
     <table>
       <tr><td class="k pk">PK</td><td>Id</td><td class="t">int</td></tr>
@@ -173,7 +182,8 @@
     ["AspNetUsers", "top", .88, "Messages", "bottom", .45, "alır", "--social"],
     ["AspNetUsers", "top", .97, "Notifications", "bottom", .15, "alır / tetikler", "--social", .62],
     ["Posts", "top", .80, "Notifications", "bottom", .55, "hakkında", "--social"],
-    ["Posts", "right", .30, "PostTags", "left", .50, "etiketlenir", "--tag"],
+    ["Posts", "right", .22, "PostImages", "left", .45, "resimleri", "--content"],
+    ["Posts", "right", .55, "PostTags", "left", .50, "etiketlenir", "--tag", .66],
     ["Tags", "top", .50, "PostTags", "bottom", .50, "kullanılır", "--tag"],
     ["AspNetUsers", "bottom", .40, "Likes", "top", .40, "beğenir", "--interact"],
     ["Posts", "bottom", .20, "Likes", "top", .80, "beğenilir", "--interact", .28],

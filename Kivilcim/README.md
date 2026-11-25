@@ -7,7 +7,8 @@ Tumblr benzeri bir blog ve paylaşım platformu. ASP.NET Core 8 MVC, Entity Fram
 | Özellik | Açıklama |
 |---|---|
 | Hesap | Kayıt, giriş, şifre işlemleri (ASP.NET Core Identity). Kayıtta blog adı otomatik oluşur. |
-| Gönderi türleri | Metin, fotoğraf, video (MP4/WEBM, 50 MB), alıntı, bağlantı |
+| Gönderi türleri | Metin, **çoklu fotoğraf** (en fazla 30; cihazdan ya da internetten), video (MP4/WEBM, 50 MB), alıntı, bağlantı |
+| Gönderi menüsü | "+ Gönderi" ile tür seçimi; telefonda alttan açılan panel ve sabit + düğmesi |
 | Akış | Takip ettiğin blogların ve kendi gönderilerin, "Daha fazla göster" ile sayfalı |
 | Keşfet | Son 30 günün en çok beğenilen ve yeniden paylaşılan gönderileri |
 | Etiketler ve arama | `/tagged/{etiket}`, `/search?q=...`, popüler etiketler |

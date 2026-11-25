@@ -1,0 +1,19 @@
+@* Gönderi türü seçenekleri: modal, ana sayfa çubuğu ve gönderi sayfası sekmeleri bunu kullanır. *@
+@model PostType?
+@{
+    var options = new (PostType Type, string Label, string Color, string Icon)[]
+    {
+        (PostType.Text, "Metin", "#1b2433", "<text x='12' y='17' text-anchor='middle' font-size='14' font-weight='800' font-family='Georgia,serif' fill='currentColor'>Aa</text>"),
+        (PostType.Photo, "Fotoğraf", "#ff4930", "<rect x='6' y='3' width='15' height='13' rx='3' fill='none' stroke='currentColor' stroke-width='2.2'/><rect x='3' y='7' width='15' height='14' rx='3' fill='currentColor'/><circle cx='8.5' cy='12' r='1.8' fill='#fff'/><path d='M4.5 19.5l4.5-4.5 3 3 2-2 3 3.5z' fill='#fff'/>"),
+        (PostType.Video, "Video", "#ff62ce", "<rect x='2' y='9' width='14' height='12' rx='3' fill='currentColor'/><path d='M16 13l6-3.5v11L16 17z' fill='currentColor'/><circle cx='5.5' cy='5.5' r='3' fill='currentColor'/><circle cx='12.5' cy='5.5' r='3' fill='currentColor'/>"),
+        (PostType.Quote, "Alıntı", "#ff8a00", "<path d='M4 18c0-4 1-8 5-10l1 2c-2 1-3 3-3 4h3v6H4zm9 0c0-4 1-8 5-10l1 2c-2 1-3 3-3 4h3v6h-6z' fill='currentColor'/>"),
+        (PostType.Link, "Bağlantı", "#00b884", "<rect x='2.5' y='8' width='11' height='8' rx='4' transform='rotate(-25 8 12)' fill='none' stroke='currentColor' stroke-width='2.6'/><rect x='10.5' y='8' width='11' height='8' rx='4' transform='rotate(-25 16 12)' fill='none' stroke='currentColor' stroke-width='2.6'/>")
+    };
+}
+@foreach (var o in options)
+{
+    <a href="/new/@o.Type" class="compose-option @(Model == o.Type ? "active" : "")" style="--opt:@o.Color" data-type="@o.Type">
+        <span class="compose-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30">@Html.Raw(o.Icon)</svg></span>
+        <span class="compose-option-label">@o.Label</span>
+    </a>
+}

@@ -36,7 +36,6 @@ public class Post
     public PostType Type { get; set; }
     public string? Title { get; set; }
     public string? Body { get; set; }
-    public string? ImagePath { get; set; }
     public string? VideoPath { get; set; }
     public string? LinkUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -46,6 +45,8 @@ public class Post
     public Post? ReblogOf { get; set; }
     public List<Post> Reblogs { get; set; } = new();
 
+    /// <summary>Fotoğraf gönderisinin görselleri (en fazla 30), sırasıyla.</summary>
+    public List<PostImage> Images { get; set; } = new();
     public List<PostTag> PostTags { get; set; } = new();
     public List<Like> Likes { get; set; } = new();
     public List<Reply> Replies { get; set; } = new();
@@ -137,4 +138,16 @@ public class Message
     public string Body { get; set; } = "";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ReadAt { get; set; }
+}
+
+/// <summary>Fotoğraf gönderisindeki tek bir görsel: yüklenen dosya ya da internet bağlantısı.</summary>
+public class PostImage
+{
+    public int Id { get; set; }
+    public int PostId { get; set; }
+    public Post Post { get; set; } = null!;
+    /// <summary>Yüklenen dosyada "/uploads/posts/..." yolu, internetten eklenende tam adres.</summary>
+    public string Url { get; set; } = "";
+    public bool IsExternal { get; set; }
+    public int SortOrder { get; set; }
 }

@@ -66,13 +66,17 @@ public class PostsController : Controller
     [Authorize]
     [HttpPost("/new/{type?}")]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(55 * 1024 * 1024)]
-    [RequestFormLimits(MultipartBodyLengthLimit = 55 * 1024 * 1024)]
+    // 30 görsel x 5 MB ya da 50 MB video + form alanları
+    [RequestSizeLimit(160 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 160 * 1024 * 1024, ValueCountLimit = 200)]
     public async Task<IActionResult> Create(CreatePostViewModel model)
     {
         var title = model.Title?.Trim();
         var body = model.Body?.Trim();
         var link = model.LinkUrl?.Trim();
+        var files = (model.Images ?? new()).Where(f => f is { Length: > 0 }).ToList();
+        var urls = (model.ImageUrls ?? new()).Select(u => u?.Trim() ?? "").Where(u => u.Length > 0).Distinct().ToList();
+        model.ImageUrls = urls;
 
         switch (model.Type)
         {
@@ -85,20 +89,50 @@ public class PostsController : Controller
             case PostType.Link when !TextFormat.IsSafeHttpUrl(link):
                 ModelState.AddModelError(nameof(model.LinkUrl), "Geçerli bir http(s) bağlantısı girin.");
                 break;
-            case PostType.Photo when model.Image == null:
-                ModelState.AddModelError(nameof(model.Image), "Bir görsel seçin.");
+            case PostType.Photo when files.Count + urls.Count == 0:
+                ModelState.AddModelError(nameof(model.Images), "En az bir resim ekle.");
+                break;
+            case PostType.Photo when files.Count + urls.Count > CreatePostViewModel.MaxImages:
+                ModelState.AddModelError(nameof(model.Images), $"En fazla {CreatePostViewModel.MaxImages} resim ekleyebilirsin.");
                 break;
             case PostType.Video when model.Video == null:
                 ModelState.AddModelError(nameof(model.Video), "Bir video seçin.");
                 break;
         }
 
-        string? imagePath = null;
-        if (ModelState.IsValid && model.Type == PostType.Photo && model.Image != null)
+        if (ModelState.IsValid && model.Type == PostType.Photo)
         {
-            var (path, error) = await _images.SaveAsync(model.Image, "posts");
-            if (error != null) ModelState.AddModelError(nameof(model.Image), error);
-            imagePath = path;
+            foreach (var u in urls)
+            {
+                if (u.Length > 2000 || !TextFormat.IsSafeHttpUrl(u))
+                {
+                    ModelState.AddModelError(nameof(model.ImageUrls), $"Geçersiz resim bağlantısı: {(u.Length > 60 ? u[..60] + "…" : u)}");
+                }
+            }
+        }
+
+        var images = new List<PostImage>();
+        if (ModelState.IsValid && model.Type == PostType.Photo)
+        {
+            foreach (var file in files)
+            {
+                var (path, error) = await _images.SaveAsync(file, "posts");
+                if (error != null)
+                {
+                    ModelState.AddModelError(nameof(model.Images), $"{file.FileName}: {error}");
+                    break;
+                }
+                images.Add(new PostImage { Url = path!, SortOrder = images.Count });
+            }
+            images.AddRange(urls.Select(u => new PostImage { Url = u, IsExternal = true }));
+            for (var i = 0; i < images.Count; i++) images[i].SortOrder = i;
+
+            if (!ModelState.IsValid)
+            {
+                // Hata olduysa bu istekte diske yazılan dosyaları geri sil.
+                foreach (var img in images.Where(i => !i.IsExternal)) _images.Delete(img.Url);
+                images.Clear();
+            }
         }
 
         string? videoPath = null;
@@ -121,8 +155,8 @@ public class PostsController : Controller
             Title = string.IsNullOrEmpty(title) ? null : title,
             Body = string.IsNullOrEmpty(body) ? null : body,
             LinkUrl = model.Type == PostType.Link ? link : null,
-            ImagePath = imagePath,
-            VideoPath = videoPath
+            VideoPath = videoPath,
+            Images = images
         };
         await AttachTagsAsync(post, model.Tags);
         _db.Posts.Add(post);
@@ -232,9 +266,10 @@ public class PostsController : Controller
         foreach (var r in reblogs) r.ReblogOfId = null;
         _db.Notifications.RemoveRange(await _db.Notifications.Where(n => n.PostId == id).ToListAsync());
 
+        var localImages = await _db.PostImages.Where(i => i.PostId == id && !i.IsExternal).Select(i => i.Url).ToListAsync();
         _db.Posts.Remove(post);
         await _db.SaveChangesAsync();
-        _images.Delete(post.ImagePath);
+        foreach (var img in localImages) _images.Delete(img);
         _images.Delete(post.VideoPath);
 
         TempData["Message"] = "Gönderi silindi.";

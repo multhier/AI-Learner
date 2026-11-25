@@ -238,6 +238,28 @@ public async Task<IActionResult> Like(int id) { ... }
     - **Bu şu demektir:** Kötü niyetli biri hangi e-postaların sitede kayıtlı olduğunu **öğrenemez.**
 - **SMTP ayarı yoksa** e-posta gönderilmez, `App_Data/mail` klasörüne **dosya olarak** kaydedilir. Böylece geliştirirken de test edebilirsin.
 
+### 8.6 Gönderi Oluşturma Menüsü ve Çoklu Fotoğraf
+
+- **Önce** "**+ Gönderi**" düğmesine basınca bir **seçenek penceresi** açılmasını sağladım: **Metin**, **Fotoğraf**, **Video**, **Alıntı**, **Bağlantı**.
+  - **Telefonda** bu pencere **alttan açılan bir panel** olur ve sağ altta sabit bir **+** düğmesi vardır.
+- **Sonra** fotoğraf gönderisini **birden fazla resim** alacak şekilde değiştirdim:
+  - **Resim yükle** → cihazdan **aynı anda birden çok** resim seçilebilir, sürükle-bırak da çalışır.
+  - **İnternetten resim yükle** → bir resim **bağlantısı** yapıştırılır.
+  - Seçilen resimler **küçük önizleme** olarak görünür; her birinin üstündeki **×** ile tek tek, kırmızı **×** ile hepsi birden kaldırılır.
+  - **Unutma:** En fazla **30** resim eklenebilir. Bu sınır hem tarayıcıda hem **sunucuda** kontrol edilir.
+- **Ardından** etiket yazmayı kolaylaştırdım: **"#etiket ekle"** kutusuna yazıp **Enter**'a ya da **virgüle** basınca etiket bir **kutucuğa** dönüşür.
+
+**Veritabanında ne değişti?**
+- Eskiden her gönderide **tek** resim yolu (`ImagePath`) vardı.
+- **Şimdi** resimler ayrı bir **`PostImages`** tablosunda tutulur; bir gönderinin **çok** resmi olabilir.
+- **Migration** yazarken dikkat ettim: Önce yeni tabloyu oluşturdum, **eski resimleri yeni tabloya kopyaladım**, **en son** eski sütunu sildim.
+  - **Bu şu demektir:** Siteyi güncelleyen biri **eski fotoğraflarını kaybetmez.** Bunu eski bir veritabanında deneyerek doğruladım.
+
+**Güvenlik:**
+- İnternetten eklenen resim **sunucuya indirilmez**, sadece adresi saklanır. Böylece sunucu başka adreslere istek atmaya zorlanamaz.
+- Sadece **http** ve **https** bağlantıları kabul edilir; `javascript:` gibi tehlikeli adresler **reddedilir.**
+- Gönderi silinince **yüklenen resim dosyaları da** diskten silinir.
+
 ---
 
 ## 9. Gerçek SQL Server'da Test Ettim
@@ -256,7 +278,7 @@ public async Task<IActionResult> Like(int id) { ... }
   3. Buton **yukarı kayıyor**, fare bırakıldığında artık butonun üstünde değil → **tıklama boşa gidiyor.**
 - **Çözüm:** Hata yazılarının yerini **baştan ayırdım** ve odak kaybında kontrolü kapattım.
 
-> **Sonuç:** **65 tarayıcı testinin 65'i de** gerçek SQL Server 2022 üzerinde **geçti.**
+> **Sonuç:** **91 tarayıcı testinin 91'i de** gerçek SQL Server 2022 üzerinde **geçti.**
 
 ---
 
@@ -303,12 +325,13 @@ docker compose up -d --build
 ## 13. Ne Yapıldı, Ne Kaldı?
 
 ### ✅ Yapılanlar
-- **Blog**, **gönderi** (metin, fotoğraf, **video**, alıntı, bağlantı), **akış**, **keşfet**, **etiket**, **arama**
+- **Blog**, **gönderi** (metin, **çoklu fotoğraf**, **video**, alıntı, bağlantı), **akış**, **keşfet**, **etiket**, **arama**
+- **+ Gönderi** seçenek menüsü (telefonda alttan açılan panel)
 - **Beğeni**, **reblog**, **yanıt**, **takip**, **gizli etiketler**
 - **Anlık bildirimler** ve **mesajlaşma** (SignalR)
 - **Türkçe** giriş, kayıt ve hesap sayfaları
 - **Şifremi unuttum** (e-posta ile sıfırlama)
-- **Gerçek SQL Server** testleri (65/65)
+- **Gerçek SQL Server** testleri (91/91)
 - **Docker** ve **GitHub Actions** ile yayına hazırlık
 
 ### ❌ Kalanlar

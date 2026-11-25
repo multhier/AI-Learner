@@ -1,90 +1,133 @@
 @model CreatePostViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
 @{
     ViewData["Title"] = "Yeni gönderi";
-    var types = new (PostType Type, string Label)[]
+    ViewData["HideComposeFab"] = true;
+    var me = await UserManager.GetUserAsync(User);
+    var titlePlaceholder = Model.Type == PostType.Quote ? "Kaynak (kimin sözü?)" : "Başlık";
+    var bodyPlaceholder = Model.Type switch
     {
-        (PostType.Text, "Metin"), (PostType.Photo, "Fotoğraf"), (PostType.Video, "Video"), (PostType.Quote, "Alıntı"), (PostType.Link, "Bağlantı")
+        PostType.Quote => "Alıntıyı buraya yaz…",
+        PostType.Text => "Aklından ne geçiyor?",
+        _ => "Bir açıklama ekle (isteğe bağlı)"
     };
 }
 
 <div class="row justify-content-center">
-    <div class="col-lg-7 col-xl-6">
-        <div class="card">
-            <div class="card-header">
-                <ul class="nav nav-pills card-header-pills">
-                    @foreach (var t in types)
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.Type == t.Type ? "active" : "")" href="/new/@t.Type">@t.Label</a>
-                        </li>
-                    }
-                </ul>
+    <div class="col-12 col-md-10 col-lg-7 col-xl-6">
+        <div class="card composer">
+            <div class="composer-head">
+                <div class="d-flex align-items-center gap-2 min-w-0">
+                    <partial name="_Avatar" model="@((me?.AvatarPath, me?.DisplayName ?? "?", 36))" />
+                    <span class="fw-semibold text-truncate">@me?.BlogName</span>
+                </div>
+                <nav class="compose-options compose-options-mini" aria-label="Gönderi türünü değiştir">
+                    <partial name="_ComposeOptions" model="@((PostType?)Model.Type)" />
+                </nav>
             </div>
-            <div class="card-body">
-                <form method="post" action="/new/@Model.Type" enctype="multipart/form-data">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="Type" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                    @if (Model.Type == PostType.Photo)
-                    {
-                        <div class="mb-3">
-                            <label asp-for="Image" class="form-label"></label>
-                            <input asp-for="Image" type="file" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" />
-                            <div class="form-text">JPG, PNG, GIF veya WEBP · en fazla 5 MB</div>
-                            <span asp-validation-for="Image" class="text-danger"></span>
-                            <img id="imagePreview" class="post-image mt-3 d-none" alt="Önizleme" />
+            <form method="post" action="/new/@Model.Type" enctype="multipart/form-data" id="composeForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Type" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mx-3 mt-3 mb-0 py-2"></div>
+
+                <input asp-for="Title" class="composer-title" placeholder="@titlePlaceholder" autocomplete="off" aria-label="@titlePlaceholder" />
+                <span asp-validation-for="Title" class="text-danger small px-3"></span>
+
+                @if (Model.Type == PostType.Photo)
+                {
+                    <section class="photo-editor" id="photoEditor" data-max="@CreatePostViewModel.MaxImages">
+                        <div class="photo-drop" id="photoDrop">
+                            <label for="Images" class="photo-drop-half" id="pickFiles">
+                                <svg viewBox="0 0 48 40" width="64" height="54" aria-hidden="true">
+                                    <path d="M8 4v8M4 8h8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+                                    <rect x="8" y="12" width="36" height="26" rx="5" fill="currentColor" />
+                                    <rect x="15" y="8" width="12" height="6" rx="2" fill="currentColor" />
+                                    <circle cx="26" cy="25" r="8" fill="#f3f4f6" />
+                                    <circle cx="26" cy="25" r="5" fill="currentColor" />
+                                </svg>
+                                <span>Resim yükle</span>
+                            </label>
+                            <span class="photo-drop-divider" aria-hidden="true"></span>
+                            <button type="button" class="photo-drop-half" id="pickUrl">
+                                <svg viewBox="0 0 48 44" width="64" height="58" aria-hidden="true">
+                                    <path d="M8 4v8M4 8h8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+                                    <circle cx="27" cy="25" r="16" fill="none" stroke="currentColor" stroke-width="3.5" />
+                                    <ellipse cx="27" cy="25" rx="7" ry="16" fill="none" stroke="currentColor" stroke-width="3" />
+                                    <path d="M11 25h32M13 17h28M13 33h28" stroke="currentColor" stroke-width="3" />
+                                </svg>
+                                <span>İnternetten resim yükle</span>
+                            </button>
+                            <button type="button" class="photo-clear" id="photoClear" aria-label="Seçilen resimlerin hepsini kaldır" title="Hepsini kaldır">
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="3" stroke-linecap="round" /></svg>
+                            </button>
                         </div>
-                    }
 
-                    @if (Model.Type == PostType.Video)
-                    {
-                        <div class="mb-3">
-                            <label asp-for="Video" class="form-label"></label>
-                            <input asp-for="Video" type="file" class="form-control" accept="video/mp4,video/webm" />
-                            <div class="form-text">MP4 veya WEBM · en fazla 50 MB</div>
-                            <span asp-validation-for="Video" class="text-danger"></span>
-                            <video id="videoPreview" class="post-video mt-3 d-none" controls muted></video>
+                        <input asp-for="Images" type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp" class="visually-hidden" />
+
+                        <div class="photo-url-row" id="urlRow" hidden>
+                            <input type="url" class="form-control" id="urlInput" placeholder="https://ornek.com/resim.jpg" inputmode="url" aria-label="Resim bağlantısı" />
+                            <button type="button" class="btn btn-spark" id="urlAdd">Ekle</button>
                         </div>
-                    }
-
-                    @if (Model.Type == PostType.Link)
-                    {
-                        <div class="mb-3">
-                            <label asp-for="LinkUrl" class="form-label"></label>
-                            <input asp-for="LinkUrl" type="url" class="form-control" placeholder="https://..." />
-                            <span asp-validation-for="LinkUrl" class="text-danger"></span>
+                        <div id="urlInputs">
+                            @foreach (var u in Model.ImageUrls)
+                            {
+                                <input type="hidden" name="ImageUrls" value="@u" />
+                            }
                         </div>
-                    }
 
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label">@(Model.Type == PostType.Quote ? "Kaynak (kimin sözü?)" : "Başlık")</label>
-                        <input asp-for="Title" class="form-control" />
-                        <span asp-validation-for="Title" class="text-danger"></span>
-                    </div>
+                        <div class="photo-previews" id="photoPreviews" aria-live="polite"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="Body" class="form-label">@(Model.Type == PostType.Quote ? "Alıntı" : Model.Type == PostType.Text ? "Metin" : "Açıklama")</label>
-                        <textarea asp-for="Body" class="form-control" rows="@(Model.Type == PostType.Text ? 8 : 4)"></textarea>
-                        <span asp-validation-for="Body" class="text-danger"></span>
-                    </div>
+                        <p class="photo-note">
+                            <strong>Unutma:</strong> En fazla @CreatePostViewModel.MaxImages resim dosyası ya da @CreatePostViewModel.MaxImages internet bağlantısı ekleyebilirsin.
+                            <span class="photo-count" id="photoCount">0 / @CreatePostViewModel.MaxImages</span>
+                        </p>
+                        <span asp-validation-for="Images" class="text-danger small"></span>
+                        <span asp-validation-for="ImageUrls" class="text-danger small"></span>
+                    </section>
+                }
 
-                    <div class="mb-4">
-                        <label asp-for="Tags" class="form-label"></label>
-                        <input asp-for="Tags" class="form-control" placeholder="#kedi, #yaz tatili" />
-                        <div class="form-text">Virgülle ayırın · en fazla 10 etiket</div>
-                    </div>
+                @if (Model.Type == PostType.Video)
+                {
+                    <section class="px-3 pt-2">
+                        <label asp-for="Video" class="photo-drop photo-drop-single">
+                            <span class="photo-drop-half">
+                                <svg viewBox="0 0 24 24" width="54" height="54" aria-hidden="true"><rect x="2" y="9" width="14" height="12" rx="3" fill="currentColor" /><path d="M16 13l6-3.5v11L16 17z" fill="currentColor" /><circle cx="5.5" cy="5.5" r="3" fill="currentColor" /><circle cx="12.5" cy="5.5" r="3" fill="currentColor" /></svg>
+                                <span>Video seç</span>
+                            </span>
+                        </label>
+                        <input asp-for="Video" type="file" accept="video/mp4,video/webm" class="visually-hidden" />
+                        <p class="photo-note"><strong>Unutma:</strong> MP4 veya WEBM, en fazla 50 MB.</p>
+                        <span asp-validation-for="Video" class="text-danger small"></span>
+                        <video id="videoPreview" class="post-video mt-2 d-none" controls muted playsinline></video>
+                    </section>
+                }
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-spark px-4">Paylaş</button>
-                        <a href="/" class="btn btn-outline-secondary">Vazgeç</a>
-                    </div>
-                </form>
-            </div>
+                @if (Model.Type == PostType.Link)
+                {
+                    <section class="px-3 pt-2">
+                        <input asp-for="LinkUrl" type="url" class="form-control form-control-lg" placeholder="https://..." inputmode="url" aria-label="Bağlantı" />
+                        <span asp-validation-for="LinkUrl" class="text-danger small"></span>
+                    </section>
+                }
+
+                <textarea asp-for="Body" class="composer-body @(Model.Type == PostType.Quote ? "composer-quote" : "")"
+                          rows="@(Model.Type == PostType.Text || Model.Type == PostType.Quote ? 6 : 3)"
+                          placeholder="@bodyPlaceholder" aria-label="@bodyPlaceholder"></textarea>
+                <span asp-validation-for="Body" class="text-danger small px-3"></span>
+
+                <div class="tag-editor" id="tagEditor">
+                    <input type="text" id="tagInput" class="tag-editor-input" placeholder="#etiket ekle" autocomplete="off"
+                           enterkeyhint="done" aria-label="Etiket ekle" />
+                </div>
+                <input asp-for="Tags" type="hidden" />
+
+                <div class="composer-foot">
+                    <a href="/" class="btn btn-outline-secondary">Vazgeç</a>
+                    <button type="submit" class="btn btn-spark px-4" id="composeSubmit">Paylaş</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

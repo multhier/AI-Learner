@@ -15,10 +15,11 @@ var useSqlite = provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
+    // Gönderi kartı birden çok liste (resimler, etiketler) yükler; tek sorguda satırlar katlanmasın diye bölünmüş sorgu.
     if (useSqlite)
-        options.UseSqlite(connectionString);
+        options.UseSqlite(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
     else
-        options.UseSqlServer(connectionString);
+        options.UseSqlServer(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
 });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

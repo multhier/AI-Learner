@@ -254,10 +254,6 @@ namespace Kivilcim.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ImagePath")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
                     b.Property<string>("LinkUrl")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
@@ -285,6 +281,35 @@ namespace Kivilcim.Data.Migrations
                     b.HasIndex("ReblogOfId");
 
                     b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("Kivilcim.Models.PostImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsExternal")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId", "SortOrder");
+
+                    b.ToTable("PostImages");
                 });
 
             modelBuilder.Entity("Kivilcim.Models.PostTag", b =>
@@ -604,6 +629,17 @@ namespace Kivilcim.Data.Migrations
                     b.Navigation("ReblogOf");
                 });
 
+            modelBuilder.Entity("Kivilcim.Models.PostImage", b =>
+                {
+                    b.HasOne("Kivilcim.Models.Post", "Post")
+                        .WithMany("Images")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+                });
+
             modelBuilder.Entity("Kivilcim.Models.PostTag", b =>
                 {
                     b.HasOne("Kivilcim.Models.Post", "Post")
@@ -706,6 +742,8 @@ namespace Kivilcim.Data.Migrations
 
             modelBuilder.Entity("Kivilcim.Models.Post", b =>
                 {
+                    b.Navigation("Images");
+
                     b.Navigation("Likes");
 
                     b.Navigation("PostTags");
