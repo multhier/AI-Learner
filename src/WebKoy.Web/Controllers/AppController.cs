@@ -22,6 +22,7 @@ public abstract class AppController : Controller
             Title = s.Title,
             Description = s.Description,
             Views = s.Views,
+            Hits = s.Hits,
             Followers = s.Followers.Count,
             Likes = s.Likes.Count,
             UpdatedAt = s.UpdatedAt,

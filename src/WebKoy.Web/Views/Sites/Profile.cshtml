@@ -58,7 +58,7 @@
         <div class="card wk-card mb-3">
             <div class="card-body">
                 <ul class="list-unstyled mb-3">
-                    <li>👁 <strong>@Model.Site.Views.ToString("N0")</strong> görüntülenme</li>
+                    <li>👁 <strong>@Model.Site.Views.ToString("N0")</strong> görüntülenme <span class="small text-muted">(@Model.Site.Hits.ToString("N0") istek)</span></li>
                     <li>♥ <strong>@Model.Likes</strong> beğeni</li>
                     <li>👥 <strong>@Model.Followers</strong> takipçi</li>
                     <li class="small text-muted mt-2">Açılış: @Model.Site.CreatedAt.ToLocalTime().ToString("d")</li>

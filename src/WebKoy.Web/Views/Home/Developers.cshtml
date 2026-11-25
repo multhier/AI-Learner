@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Geliştirici API";
+    var b = $"{Context.Request.Scheme}://{Context.Request.Host}/api";
+    var endpoints = new (string Method, string Path, string Desc, string Example)[]
+    {
+        ("POST", "/upload", "Bir veya daha fazla dosya yükler. Form alanının adı, dosyanın sitedeki yoludur. Eksik klasörler oluşturulur. Önce tüm dosyalar doğrulanır, biri geçersizse hiçbiri yazılmaz. İçeriği aynı olan dosyalar atlanır.",
+            $"curl -H \"Authorization: Bearer ANAHTAR\" \\\n  -F \"index.html=@yerel.html\" \\\n  -F \"css/style.css=@css/stil.css\" \\\n  {b}/upload"),
+        ("POST", "/create_directory", "Klasör oluşturur (path). Üst klasörler de oluşturulur. Hedef varsa hata verir.",
+            $"curl -H \"Authorization: Bearer ANAHTAR\" -d \"path=resimler/kediler\" {b}/create_directory"),
+        ("POST", "/rename", "Dosya veya klasörü taşır ya da yeniden adlandırır (path, new_path). Hedefin üst klasörü var olmalı, var olan bir dosyanın üzerine yazılamaz. index.html taşınamaz, klasörler .html adı alamaz.",
+            $"curl -H \"Authorization: Bearer ANAHTAR\" -d \"path=taslak/hakkinda.html\" -d \"new_path=hakkinda.html\" {b}/rename"),
+        ("POST", "/delete", "Bir veya daha fazla yolu siler (filenames[]). Klasörler içerikleriyle birlikte silinir. Yollardan biri geçersizse hiçbiri silinmez.",
+            $"curl -H \"Authorization: Bearer ANAHTAR\" -d \"filenames[]=eski.jpg\" -d \"filenames[]=taslak.html\" {b}/delete"),
+        ("GET", "/list", "path verilmezse tüm siteyi özyinelemeli listeler, verilirse yalnızca o klasörün içini. Dosyalar için size ve sha1_hash de döner.",
+            $"curl -H \"Authorization: Bearer ANAHTAR\" \"{b}/list?path=resimler\""),
+        ("GET", "/download", "Tek bir dosyanın ham içeriğini indirir (path). ETag başlığında SHA-1 değeri döner.",
+            $"curl -H \"Authorization: Bearer ANAHTAR\" -o index.html \"{b}/download?path=index.html\""),
+        ("GET", "/info", "Site bilgisi: görüntülenme, istek sayısı, tarihler, etiketler. sitename verilirse kimlik doğrulama gerekmez.",
+            $"curl \"{b}/info?sitename=ornek\""),
+        ("POST", "/upload_hash", "Yerel SHA-1 özetlerini sitedekilerle karşılaştırır (alan adı yol, değer SHA-1). Aynıysa true döner; yalnızca değişen dosyaları yüklemek için kullanın.",
+            $"curl -H \"Authorization: Bearer ANAHTAR\" --data-urlencode \"index.html=$(sha1sum index.html | cut -d' ' -f1)\" {b}/upload_hash"),
+    };
+}
+<h2>Geliştirici API</h2>
+<p class="lead">Sitenizi kendi betiklerinizden ve dağıtım araçlarınızdan yönetin.</p>
+
+<div class="card wk-card mb-4"><div class="card-body">
+    <h5>Kimlik doğrulama ve istekler</h5>
+    <ul class="mb-0">
+        <li>API anahtarınızı <a href="/dashboard/settings">Site ayarları</a> sayfasından oluşturun ve <code>Authorization: Bearer ANAHTAR</code> başlığıyla gönderin.</li>
+        <li>GET isteklerinde parametreler query string'de gider. POST istekleri <code>application/x-www-form-urlencoded</code> kullanır; yalnızca <code>/upload</code> <code>multipart/form-data</code> kullanır.</li>
+        <li>Yanıtlar JSON'dır: <code>{"result":"success", ...}</code>. İstek hataları <code>400</code>, kimlik hataları <code>403</code>, bilinmeyen uç noktalar <code>404</code> döner. Hata gövdesinde <code>error_type</code> ve <code>message</code> alanları bulunur.</li>
+        <li>Lütfen ölçülü kullanın: anahtar başına dakikada 60 istek sınırı var. Yalnızca değişen dosyaları yükleyin; güncellemeleri en sık on dakikada bir yapın.</li>
+    </ul>
+</div></div>
+
+@foreach (var e in endpoints)
+{
+    <div class="mb-4">
+        <h5><span class="badge @(e.Method == "GET" ? "bg-primary" : "bg-success")">@e.Method</span> <code>/api@(e.Path)</code></h5>
+        <p class="mb-2">@e.Desc</p>
+        <pre class="bg-white border rounded p-2 small mb-0"><code>@e.Example</code></pre>
+    </div>
+}
+
+<h5>Örnek hata</h5>
+<pre class="bg-white border rounded p-2 small"><code>HTTP/1.1 400 Bad Request
+{"result":"error","error_type":"missing_path","message":"path alanı gerekli"}</code></pre>

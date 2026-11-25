@@ -24,8 +24,14 @@ public class HomeController(AppDbContext db, IOptions<PlatformOptions> options) 
         });
     }
 
+    public static readonly (string Key, string Label)[] Sorts =
+    [
+        ("last_updated", "Son güncellenen"), ("most_followed", "En çok takip edilen"), ("views", "En çok görüntülenen"),
+        ("likes", "En çok beğenilen"), ("newest", "En yeni"), ("oldest", "En eski"), ("random", "Rastgele"),
+    ];
+
     [Route("browse")]
-    public async Task<IActionResult> Browse(string sort = "updated", string? tag = null, string? q = null, int page = 1)
+    public async Task<IActionResult> Browse(string sort = "last_updated", string? tag = null, string? q = null, int page = 1)
     {
         page = Math.Max(1, page);
         var query = db.Sites.Where(s => !s.IsBanned);
@@ -41,12 +47,16 @@ public class HomeController(AppDbContext db, IOptions<PlatformOptions> options) 
             query = query.Where(s => s.Name.Contains(q) || (s.Title != null && s.Title.Contains(q)) || (s.Description != null && s.Description.Contains(q)));
         }
 
+        if (!Sorts.Any(s => s.Key == sort)) sort = "last_updated";
         query = sort switch
         {
             "views" => query.OrderByDescending(s => s.Views),
-            "followers" => query.OrderByDescending(s => s.Followers.Count).ThenByDescending(s => s.Views),
+            "most_followed" => query.OrderByDescending(s => s.Followers.Count).ThenByDescending(s => s.Views),
             "likes" => query.OrderByDescending(s => s.Likes.Count).ThenByDescending(s => s.Views),
-            "new" => query.OrderByDescending(s => s.CreatedAt),
+            "newest" => query.OrderByDescending(s => s.CreatedAt),
+            "oldest" => query.OrderBy(s => s.CreatedAt),
+            // SQL Server: NEWID() ile rastgele sıralama (EF.Functions.Random sayfalamada tutarsız olabilir; keşif için yeterli).
+            "random" => query.OrderBy(s => Guid.NewGuid()),
             _ => query.OrderByDescending(s => s.UpdatedAt),
         };
 
@@ -65,6 +75,9 @@ public class HomeController(AppDbContext db, IOptions<PlatformOptions> options) 
             PopularTags = popularTags,
         });
     }
+
+    [Route("developers")]
+    public IActionResult Developers() => View();
 
     [Route("terms")]
     public IActionResult Terms() => View();

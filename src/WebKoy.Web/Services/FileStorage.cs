@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 
 namespace WebKoy.Web.Services;
@@ -5,7 +6,8 @@ namespace WebKoy.Web.Services;
 /// <summary>Dosya içeriklerinin saklandığı yer. Ölçeklenmek için S3/Azure Blob uygulaması yazılabilir.</summary>
 public interface IFileStorage
 {
-    Task WriteAsync(int siteId, string path, Stream content, CancellationToken ct = default);
+    /// <summary>İçeriği yazar ve SHA-1 özetini (küçük harf hex) döner.</summary>
+    Task<string> WriteAsync(int siteId, string path, Stream content, CancellationToken ct = default);
     Stream? OpenRead(int siteId, string path);
     void Delete(int siteId, string path);
     void Move(int siteId, string from, string to);
@@ -39,14 +41,31 @@ public class LocalFileStorage : IFileStorage
         return full;
     }
 
-    public async Task WriteAsync(int siteId, string path, Stream content, CancellationToken ct = default)
+    public async Task<string> WriteAsync(int siteId, string path, Stream content, CancellationToken ct = default)
     {
         var full = Physical(siteId, path);
         Directory.CreateDirectory(Path.GetDirectoryName(full)!);
         var tmp = full + ".upload-" + Guid.NewGuid().ToString("N");
-        await using (var fs = new FileStream(tmp, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, true))
-            await content.CopyToAsync(fs, ct);
-        File.Move(tmp, full, overwrite: true);
+        using var sha1 = IncrementalHash.CreateHash(HashAlgorithmName.SHA1);
+        try
+        {
+            await using (var fs = new FileStream(tmp, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, true))
+            {
+                var buffer = new byte[81920];
+                int read;
+                while ((read = await content.ReadAsync(buffer, ct)) > 0)
+                {
+                    sha1.AppendData(buffer, 0, read);
+                    await fs.WriteAsync(buffer.AsMemory(0, read), ct);
+                }
+            }
+            File.Move(tmp, full, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(tmp)) File.Delete(tmp);
+        }
+        return Convert.ToHexString(sha1.GetHashAndReset()).ToLowerInvariant();
     }
 
     public Stream? OpenRead(int siteId, string path)

@@ -19,7 +19,9 @@ public class PlatformOptions
     public string StorageRoot { get; set; } = "App_Data/sites";
 
     public long QuotaBytes { get; set; } = 1L * 1024 * 1024 * 1024;
-    public long MaxFileBytes { get; set; } = 50L * 1024 * 1024;
+    public long MaxFileBytes { get; set; } = 100L * 1024 * 1024;
+    /// <summary>Tek bir yükleme isteğinin toplam üst sınırı.</summary>
+    public long MaxRequestBytes { get; set; } = 100L * 1024 * 1024;
     public int MaxFilesPerSite { get; set; } = 10_000;
     public long MaxEditableTextBytes { get; set; } = 1L * 1024 * 1024;
 

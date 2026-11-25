@@ -49,13 +49,19 @@ builder.Services.ConfigureApplicationCookie(o =>
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 builder.Services.AddSingleton<ViewCounter>();
+builder.Services.AddSingleton<HitCounter>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<HitCounter>());
+builder.Services.AddScoped<ApiKeyService>();
+builder.Services.Configure<CaptchaOptions>(builder.Configuration.GetSection(CaptchaOptions.Section));
+builder.Services.AddHttpClient<CaptchaVerifier>(c => c.Timeout = TimeSpan.FromSeconds(10));
 builder.Services.AddScoped<SiteFileService>();
 builder.Services.AddScoped<SiteProvisioner>();
 builder.Services.AddScoped<SocialService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-builder.Services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = platform.MaxFileBytes * 20);
-builder.WebHost.ConfigureKestrel(k => k.Limits.MaxRequestBodySize = platform.MaxFileBytes * 20);
+// İstek gövdesi: dosya içeriği + multipart başlıkları için küçük bir pay.
+builder.Services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = platform.MaxRequestBytes + 10 * 1024 * 1024);
+builder.WebHost.ConfigureKestrel(k => k.Limits.MaxRequestBodySize = platform.MaxRequestBytes + 10 * 1024 * 1024);
 
 builder.Services.AddRateLimiter(o =>
 {
@@ -63,6 +69,12 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy("auth", ctx => RateLimitPartition.GetFixedWindowLimiter(
         ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
+    // API: anahtar başına dakikada 60 istek (Neocities kullanım kurallarıyla aynı ruhta: toplu, seyrek istekler).
+    o.AddPolicy("api", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        ctx.Request.Headers.Authorization.ToString() is { Length: > 0 } auth
+            ? "key:" + ApiKeyService.Hash(auth)
+            : "ip:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 60, Window = TimeSpan.FromMinutes(1) }));
     o.AddPolicy("write", ctx => RateLimitPartition.GetFixedWindowLimiter(
         ctx.User.Identity?.Name ?? ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 120, Window = TimeSpan.FromMinutes(1) }));

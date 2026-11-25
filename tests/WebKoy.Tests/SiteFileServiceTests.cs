@@ -118,12 +118,68 @@ public sealed class SiteFileServiceTests : IDisposable
     public async Task Renaming_folder_moves_children()
     {
         await _svc.UploadAsync(_site, "", [Item("old/a.html", "A")]);
+        await _svc.CreateFolderAsync(_site, "new");
         await _svc.RenameAsync(_site, "old", "new/place");
 
         var paths = await _db.SiteFiles.Select(f => f.Path).OrderBy(p => p).ToListAsync();
         Assert.Equal(new[] { "new", "new/place", "new/place/a.html" }, paths);
         Assert.Equal("A", Read("new/place/a.html"));
     }
+
+    [Fact]
+    public async Task Rename_requires_existing_destination_parent()
+    {
+        await _svc.SaveTextAsync(_site, "a.html", "x");
+        var ex = await Assert.ThrowsAsync<SiteFileException>(() => _svc.RenameAsync(_site, "a.html", "missing/a.html"));
+        Assert.Equal("missing_directory", ex.ErrorType);
+    }
+
+    [Fact]
+    public async Task Folder_cannot_get_html_name()
+    {
+        await _svc.CreateFolderAsync(_site, "blog");
+        await Assert.ThrowsAsync<SiteFileException>(() => _svc.RenameAsync(_site, "blog", "blog.html"));
+        await Assert.ThrowsAsync<SiteFileException>(() => _svc.CreateFolderAsync(_site, "x.htm"));
+    }
+
+    [Fact]
+    public async Task Upload_records_sha1()
+    {
+        await _svc.UploadAsync(_site, "", [Item("a.txt", "abc")]);
+        var f = await _db.SiteFiles.SingleAsync(x => x.Path == "a.txt");
+        Assert.Equal("a9993e364706816aba3e25717850c26c9cd0d89d", f.Sha1);
+    }
+
+    [Fact]
+    public async Task Identical_upload_is_reported_unchanged_and_does_not_bump_update_time()
+    {
+        await _svc.UploadAsync(_site, "", [Item("a.txt", "abc")]);
+        var stamp = _site.UpdatedAt = new DateTime(2020, 1, 1);
+        await _db.SaveChangesAsync();
+
+        var r = await _svc.UploadAsync(_site, "", [Item("a.txt", "abc")]);
+        Assert.Equal(0, r.Written);
+        Assert.Equal(1, r.Unchanged);
+        Assert.Equal(stamp, _site.UpdatedAt);
+        Assert.Equal(3, _site.StorageBytes);
+    }
+
+    [Fact]
+    public async Task Delete_many_is_all_or_nothing()
+    {
+        await _svc.UploadAsync(_site, "", [Item("a.txt", "1"), Item("b.txt", "2")]);
+        var ex = await Assert.ThrowsAsync<SiteFileException>(() => _svc.DeleteManyAsync(_site, ["a.txt", "nope.txt"]));
+        Assert.Equal("missing_file", ex.ErrorType);
+        Assert.Equal(2, await _db.SiteFiles.CountAsync());
+
+        await _svc.DeleteManyAsync(_site, ["a.txt", "b.txt"]);
+        Assert.Equal(0, await _db.SiteFiles.CountAsync());
+        Assert.Equal(0, _site.StorageBytes);
+    }
+
+    [Fact]
+    public async Task Duplicate_path_in_one_request_is_rejected()
+        => await Assert.ThrowsAsync<SiteFileException>(() => _svc.UploadAsync(_site, "", [Item("a.txt", "1"), Item("/a.txt", "2")]));
 
     [Fact]
     public async Task Folder_cannot_be_moved_into_itself()

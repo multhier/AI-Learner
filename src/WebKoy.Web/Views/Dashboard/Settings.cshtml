@@ -22,6 +22,40 @@
             <button class="btn btn-wk">Kaydet</button>
         </form>
 
+        <div class="card wk-card mb-4">
+            <div class="card-body">
+                <h5>API anahtarı</h5>
+                <p class="small">Sitenizi kendi betiklerinizden veya dağıtım araçlarınızdan yönetmek için. Anahtarı gizli tutun; sitenizin dosyalarına tam erişim verir.</p>
+                @if (Model.NewApiKey is not null)
+                {
+                    <div class="alert alert-warning">
+                        <div class="small mb-1">Bu anahtar yalnızca şimdi gösteriliyor, kopyalayın:</div>
+                        <code class="user-select-all text-break">@Model.NewApiKey</code>
+                    </div>
+                    <pre class="small bg-light p-2 rounded text-wrap"><code>curl -H "Authorization: Bearer @Model.NewApiKey" \
+  -F "index.html=@@index.html" \
+  @Model.ApiBaseUrl/upload</code></pre>
+                }
+                else if (Model.ApiKeyCreatedAt is { } created)
+                {
+                    <p class="small text-muted">Etkin anahtar: @created.ToLocalTime().ToString("g") tarihinde oluşturuldu.</p>
+                }
+                <div class="d-flex gap-2">
+                    <form asp-action="ApiKey" method="post">
+                        <button class="btn btn-sm btn-wk">@(Model.ApiKeyCreatedAt is null ? "Anahtar oluştur" : "Yeni anahtar oluştur")</button>
+                    </form>
+                    @if (Model.ApiKeyCreatedAt is not null)
+                    {
+                        <form asp-action="ApiKey" method="post">
+                            <input type="hidden" name="revoke" value="true" />
+                            <button class="btn btn-sm btn-outline-danger">İptal et</button>
+                        </form>
+                    }
+                    <a class="btn btn-sm btn-outline-secondary" href="/developers">API belgeleri</a>
+                </div>
+            </div>
+        </div>
+
         <div class="card border-danger">
             <div class="card-body">
                 <h5 class="text-danger">Hesabı sil</h5>

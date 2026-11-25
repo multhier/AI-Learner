@@ -28,6 +28,9 @@ public class RegisterViewModel
     [Display(Name = "Şifre (tekrar)")]
     public string ConfirmPassword { get; set; } = "";
 
+    [Display(Name = "Etiketler (ilgi alanların, site konuları)")]
+    public string? Tags { get; set; }
+
     [Range(typeof(bool), "true", "true", ErrorMessage = "Kullanım koşullarını kabul etmelisiniz.")]
     public bool AcceptTerms { get; set; }
 }
@@ -48,12 +51,28 @@ public class LoginViewModel
     public string? ReturnUrl { get; set; }
 }
 
+public class ResetPasswordViewModel
+{
+    public string UserId { get; set; } = "";
+    public string Code { get; set; } = "";
+
+    [Required(ErrorMessage = "Şifre gerekli."), DataType(DataType.Password)]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Şifre en az 8 karakter olmalı.")]
+    [Display(Name = "Yeni şifre")]
+    public string Password { get; set; } = "";
+
+    [DataType(DataType.Password), Compare(nameof(Password), ErrorMessage = "Şifreler eşleşmiyor.")]
+    [Display(Name = "Yeni şifre (tekrar)")]
+    public string ConfirmPassword { get; set; } = "";
+}
+
 public class SiteCardViewModel
 {
     public string Name { get; set; } = "";
     public string? Title { get; set; }
     public string? Description { get; set; }
     public long Views { get; set; }
+    public long Hits { get; set; }
     public int Followers { get; set; }
     public int Likes { get; set; }
     public DateTime UpdatedAt { get; set; }
@@ -64,7 +83,7 @@ public class SiteCardViewModel
 public class BrowseViewModel
 {
     public List<SiteCardViewModel> Sites { get; set; } = new();
-    public string Sort { get; set; } = "updated";
+    public string Sort { get; set; } = "last_updated";
     public string? Tag { get; set; }
     public string? Query { get; set; }
     public int Page { get; set; } = 1;
@@ -121,6 +140,10 @@ public class SiteSettingsViewModel
     public string? Tags { get; set; }
 
     public string Name { get; set; } = "";
+    public DateTime? ApiKeyCreatedAt { get; set; }
+    /// <summary>Yalnızca oluşturulduğu istekte gösterilir.</summary>
+    public string? NewApiKey { get; set; }
+    public string ApiBaseUrl { get; set; } = "";
 }
 
 public class SiteProfileViewModel

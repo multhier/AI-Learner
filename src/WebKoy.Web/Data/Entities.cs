@@ -19,8 +19,15 @@ public class Site
     public string? Title { get; set; }
     public string? Description { get; set; }
 
+    /// <summary>Tekil ziyaretçi sayısı (IP başına günde bir).</summary>
     public long Views { get; set; }
+    /// <summary>Sunulan tüm dosya istekleri.</summary>
+    public long Hits { get; set; }
     public long StorageBytes { get; set; }
+
+    /// <summary>API anahtarının SHA-256 özeti; anahtarın kendisi saklanmaz.</summary>
+    public string? ApiKeyHash { get; set; }
+    public DateTime? ApiKeyCreatedAt { get; set; }
 
     public bool IsBanned { get; set; }
     public string? BanReason { get; set; }
@@ -46,6 +53,9 @@ public class SiteFile
     public string Path { get; set; } = default!;
     public bool IsDirectory { get; set; }
     public long Size { get; set; }
+    /// <summary>İçeriğin SHA-1 özeti (küçük harf hex); klasörlerde null.</summary>
+    public string? Sha1 { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
 

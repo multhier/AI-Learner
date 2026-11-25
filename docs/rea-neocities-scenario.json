@@ -1,0 +1,153 @@
+{
+ "browser": {
+  "mode": "connect",
+  "cdp_endpoint": "http://127.0.0.1:9222",
+  "target_id": "D7834846E4498AB4545B089E1C083505"
+ },
+ "start_url": {
+  "url": "https://neocities.org/"
+ },
+ "actions": [
+  {
+   "step_id": "home",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "browse",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/browse"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "browse_tag",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/browse",
+    "query": [
+     {
+      "name": "tag",
+      "value": {
+       "source": "literal",
+       "value": "art"
+      }
+     },
+     {
+      "name": "sort_by",
+      "value": {
+       "source": "literal",
+       "value": "followers"
+      }
+     }
+    ]
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "signin",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/signin"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "profile",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/site/neocities"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "supporter",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/supporter"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "api",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/api"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "tutorials",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/tutorials"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "about",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/about"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "terms",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/terms"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "permanent",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/permanent-web"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  },
+  {
+   "step_id": "forgot",
+   "action": "goto",
+   "destination": {
+    "url": "https://neocities.org/password_reset"
+   },
+   "wait_until": "load",
+   "timeout_ms": 45000
+  }
+ ],
+ "capture": {
+  "after_each_step": [
+   "url",
+   "dom",
+   "accessibility"
+  ],
+  "events": [
+   "network",
+   "console",
+   "page-errors"
+  ],
+  "network": {
+   "request_body": false,
+   "response_body": false,
+   "header_values": true
+  }
+ }
+}

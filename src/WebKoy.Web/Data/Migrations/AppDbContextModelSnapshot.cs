@@ -339,6 +339,13 @@ namespace WebKoy.Web.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("ApiKeyCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ApiKeyHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<string>("BanReason")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -349,6 +356,9 @@ namespace WebKoy.Web.Data.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("Hits")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsBanned")
                         .HasColumnType("bit");
@@ -377,6 +387,10 @@ namespace WebKoy.Web.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ApiKeyHash")
+                        .IsUnique()
+                        .HasFilter("[ApiKeyHash] IS NOT NULL");
+
                     b.HasIndex("Name")
                         .IsUnique();
 
@@ -398,6 +412,9 @@ namespace WebKoy.Web.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsDirectory")
                         .HasColumnType("bit");
 
@@ -405,6 +422,11 @@ namespace WebKoy.Web.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Sha1")
+                        .HasMaxLength(40)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(40)");
 
                     b.Property<int>("SiteId")
                         .HasColumnType("int");

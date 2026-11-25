@@ -8,13 +8,18 @@ Kullanıcılar kaydolur, `kullanici.sitealanadi.com` adresinde bir site alır, H
 
 | Alan | İçerik |
 |---|---|
-| Hesap | Kayıt (site adı = kullanıcı adı), giriş, e-posta doğrulama, hesap kilitleme, kalıcı hesap silme |
+| Hesap | Kayıt (site adı = kullanıcı adı, ilgi alanı etiketleri, hCaptcha), giriş, e-posta doğrulama, şifre sıfırlama, hesap kilitleme, kalıcı hesap silme |
 | Dosya yöneticisi | Çoklu dosya ve klasör yükleme, sürükle-bırak, klasör oluşturma, yeniden adlandırma ve taşıma, silme, kota çubuğu |
 | Düzenleyici | Tarayıcıda kod düzenleme (CodeMirror), Ctrl+S ile AJAX kaydetme, kaydedilmemiş değişiklik uyarısı |
 | Yayınlama | `{site}.{SitesDomain}` adresinden sunum, `/about` → `about.html` / `about/index.html`, özel `not_found.html`, ETag/304 |
-| Topluluk | Keşfet sayfası (sıralama, etiket, arama), site profili, takip, beğeni, yorum, ziyaret sayacı (IP başına günde 1) |
+| Topluluk | Keşfet sayfası (7 sıralama, etiket, arama), site profili, takip, beğeni, yorum, görüntülenme (IP başına günde 1) ve istek (hits) sayacı |
+| Geliştirici API'si | Site başına API anahtarı; `upload`, `create_directory`, `rename`, `delete`, `list`, `download`, `info`, `upload_hash`. Neocities API'siyle aynı sözleşme ([/developers](src/WebKoy.Web/Views/Home/Developers.cshtml)) |
 | Moderasyon | Şikayet etme, yönetici paneli, siteyi askıya alma (HTTP 451) |
 | Güvenlik | Ayrı alan adında kullanıcı içeriği, CSRF koruması, rate limiting, yol doğrulama (path traversal), dosya türü beyaz listesi, kota ve dosya sayısı sınırı |
+
+## Neocities analizi
+
+Neocities'in dışarıdan gözlenebilen davranışı [REA](https://github.com/morluto/rea) ile kayıt altına alındı. Bulgular ve WebKöy ile karşılaştırması: [docs/neocities-analiz.md](docs/neocities-analiz.md). Analiz yalnızca herkese açık sayfaları kapsar; Neocities'in kaynak kodu kullanılmadı.
 
 ## Mimari
 
@@ -37,7 +42,7 @@ src/WebKoy.Web
 ├── Services/         SiteFileService (kota/tür/klasör kuralları), SitePath (güvenli yol), SiteNameRules,
 │                     FileTypePolicy, LocalFileStorage, SocialService, ViewCounter, EmailSender
 └── Views/            Razor görünümleri (Türkçe arayüz)
-tests/WebKoy.Tests    xUnit: yol güvenliği, ad kuralları, kota, klasör işlemleri, etiketler
+tests/WebKoy.Tests    xUnit: yol güvenliği, ad kuralları, kota, klasör işlemleri, etiketler, API sözleşmesi (WebApplicationFactory)
 ```
 
 ### Veritabanı tabloları
@@ -77,7 +82,8 @@ Yeni migration: `dotnet ef migrations add <Ad> -p src/WebKoy.Web -o Data/Migrati
    - `ConnectionStrings__Default`
    - `Platform__PanelHost=webkoy.com`, `Platform__SitesDomain=webkoy.site`, `Platform__SitesScheme=https`
    - `Platform__StorageRoot=/data/sites` (kalıcı disk) ve `Platform__AdminEmails__0=siz@...`
-   - `Smtp__Host`, `Smtp__User`, `Smtp__Password`, `Smtp__From` (e-posta doğrulaması için gerekli)
+   - `Smtp__Host`, `Smtp__User`, `Smtp__Password`, `Smtp__From` (e-posta doğrulaması ve şifre sıfırlama için gerekli)
+   - `Captcha__SiteKey`, `Captcha__Secret` ([hCaptcha](https://www.hcaptcha.com/) anahtarları; boş bırakılırsa CAPTCHA devre dışı kalır)
 6. **Yedekleme:** MSSQL yedekleri ve `StorageRoot` klasörü birlikte yedeklenmeli.
 7. **Kullanım koşulları ve KVKK metni:** `Views/Home/Terms.cshtml` bir şablondur, hukukçuya gözden geçirtin.
 8. Birden fazla sunucuya ölçeklenirken:
@@ -87,10 +93,10 @@ Yeni migration: `dotnet ef migrations add <Ad> -p src/WebKoy.Web -o Data/Migrati
 
 ## Yol haritası (henüz yok)
 
-- Kayıtta CAPTCHA (hCaptcha veya Cloudflare Turnstile): spam hesapları önlemek için ilk eklenecek özellik.
-- Şifre sıfırlama akışı (Identity token altyapısı hazır, yalnızca ekranlar eksik).
+- Etkinlik akışı (site güncellemeleri, takipler) ve profil duvarında beğeniler (Neocities'te var, bkz. analiz).
+- Bahşiş (tip) ve ücretli destekçi planı.
 - Site ekran görüntüleri (keşfet sayfası için Playwright ile arka plan işi).
 - Özel alan adı bağlama (CNAME doğrulaması ve otomatik TLS).
-- WebDAV veya CLI ile dosya yükleme, ZIP olarak indirme.
+- WebDAV veya SFTP ile dosya yükleme, ZIP olarak indirme, komut satırı aracı (API hazır).
 - Site aktivite akışı ("takip ettiğin siteler güncellendi").
 - Ücretli plan (daha fazla kota ve özel alan adı).

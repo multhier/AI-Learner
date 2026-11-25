@@ -20,7 +20,9 @@ public class AccountController(
     AppDbContext db,
     SiteProvisioner provisioner,
     IFileStorage storage,
-    IEmailSender email,
+    IEmailSender emailSender,
+    CaptchaVerifier captcha,
+    SocialService social,
     IOptions<PlatformOptions> options,
     ILogger<AccountController> logger) : AppController
 {
@@ -37,6 +39,9 @@ public class AccountController(
             ModelState.AddModelError(nameof(model.SiteName), nameError);
         else if (await db.Sites.AnyAsync(s => s.Name == model.SiteName) || await users.FindByNameAsync(model.SiteName) is not null)
             ModelState.AddModelError(nameof(model.SiteName), "Bu site adı alınmış.");
+
+        if (ModelState.IsValid && !await captcha.VerifyAsync(Request.Form["h-captcha-response"], HttpContext.Connection.RemoteIpAddress?.ToString()))
+            ModelState.AddModelError("", "Lütfen robot olmadığınızı doğrulayın.");
 
         if (!ModelState.IsValid) return View(model);
 
@@ -56,6 +61,7 @@ public class AccountController(
             await provisioner.ProvisionAsync(site);
             site.UpdatedAt = site.CreatedAt;
             await db.SaveChangesAsync();
+            await social.SetTagsAsync(site, SocialService.ParseTags(model.Tags));
             await tx.CommitAsync();
         });
 
@@ -129,6 +135,56 @@ public class AccountController(
         return RedirectToAction(nameof(Login));
     }
 
+    [HttpGet]
+    public IActionResult ForgotPassword() => View();
+
+    [HttpPost, EnableRateLimiting("auth")]
+    public async Task<IActionResult> ForgotPassword(string email)
+    {
+        var user = string.IsNullOrWhiteSpace(email) ? null : await users.FindByEmailAsync(email.Trim());
+        if (user is not null)
+        {
+            var token = await users.GeneratePasswordResetTokenAsync(user);
+            var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var link = Url.Action(nameof(ResetPassword), "Account", new { userId = user.Id, code }, Request.Scheme)!;
+            await emailSender.SendEmailAsync(user.Email!, "Şifre sıfırlama",
+                $"Şifrenizi sıfırlamak için <a href=\"{HtmlEncoder.Default.Encode(link)}\">buraya tıklayın</a>. Bu isteği siz yapmadıysanız bu e-postayı yok sayın.");
+        }
+        // Hesap var mı yok mu, sızdırmamak için her durumda aynı mesaj.
+        Flash("Bu adrese kayıtlı bir hesap varsa şifre sıfırlama bağlantısı gönderildi.");
+        return RedirectToAction(nameof(Login));
+    }
+
+    [HttpGet]
+    public IActionResult ResetPassword(string userId, string code) => View(new ResetPasswordViewModel { UserId = userId, Code = code });
+
+    [HttpPost, EnableRateLimiting("auth")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+        var user = await users.FindByIdAsync(model.UserId);
+        IdentityResult? result = null;
+        if (user is not null)
+        {
+            try
+            {
+                var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
+                result = await users.ResetPasswordAsync(user, token, model.Password);
+            }
+            catch (FormatException) { }
+        }
+        if (result?.Succeeded != true)
+        {
+            foreach (var e in result?.Errors ?? [])
+                if (e.Code != "InvalidToken") ModelState.AddModelError("", TranslateIdentityError(e));
+            if (ModelState.ErrorCount == 0) ModelState.AddModelError("", "Bağlantı geçersiz veya süresi dolmuş. Yeniden sıfırlama isteyin.");
+            return View(model);
+        }
+        await users.ResetAccessFailedCountAsync(user!);
+        Flash("Şifreniz değiştirildi, giriş yapabilirsiniz.");
+        return RedirectToAction(nameof(Login));
+    }
+
     [HttpPost, Authorize]
     public async Task<IActionResult> Delete(string confirmName)
     {
@@ -161,7 +217,7 @@ public class AccountController(
         var token = await users.GenerateEmailConfirmationTokenAsync(user);
         var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         var link = Url.Action(nameof(ConfirmEmail), "Account", new { userId = user.Id, code }, Request.Scheme)!;
-        await email.SendEmailAsync(user.Email!, "E-posta adresinizi doğrulayın",
+        await emailSender.SendEmailAsync(user.Email!, "E-posta adresinizi doğrulayın",
             $"Merhaba {HtmlEncoder.Default.Encode(user.UserName!)},<br>Hesabınızı doğrulamak için <a href=\"{HtmlEncoder.Default.Encode(link)}\">buraya tıklayın</a>.");
     }
 

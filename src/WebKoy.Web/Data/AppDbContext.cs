@@ -29,6 +29,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.BanReason).HasMaxLength(500);
             e.HasIndex(x => x.UpdatedAt);
             e.HasIndex(x => x.Views);
+            e.Property(x => x.ApiKeyHash).HasMaxLength(64);
+            e.HasIndex(x => x.ApiKeyHash).IsUnique().HasFilter("[ApiKeyHash] IS NOT NULL");
             // Kullanıcı başına tek site.
             e.HasOne(x => x.Owner).WithOne(u => u.Site)
                 .HasForeignKey<Site>(x => x.OwnerId).OnDelete(DeleteBehavior.Cascade);
@@ -38,6 +40,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         b.Entity<SiteFile>(e =>
         {
             e.Property(x => x.Path).HasMaxLength(400).IsRequired();
+            e.Property(x => x.Sha1).HasMaxLength(40).IsUnicode(false);
             e.HasIndex(x => new { x.SiteId, x.Path }).IsUnique();
             e.HasOne(x => x.Site).WithMany(s => s.Files).HasForeignKey(x => x.SiteId).OnDelete(DeleteBehavior.Cascade);
         });

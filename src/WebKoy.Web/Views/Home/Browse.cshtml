@@ -1,7 +1,7 @@
 @model BrowseViewModel
 @{
     ViewData["Title"] = "Siteleri keşfet";
-    var sorts = new (string Key, string Label)[] { ("updated", "Son güncellenen"), ("new", "En yeni"), ("views", "En çok görüntülenen"), ("likes", "En çok beğenilen"), ("followers", "En çok takip edilen") };
+    var sorts = WebKoy.Web.Controllers.HomeController.Sorts;
 }
 <h2>Siteleri keşfet</h2>
 <form method="get" class="row g-2 align-items-end my-3">

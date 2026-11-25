@@ -10,7 +10,7 @@ using WebKoy.Web.Services;
 namespace WebKoy.Web.Controllers;
 
 [Authorize, Route("dashboard/[action]"), EnableRateLimiting("write")]
-public class DashboardController(AppDbContext db, SiteFileService files, SocialService social, IOptions<PlatformOptions> options) : AppController
+public class DashboardController(AppDbContext db, SiteFileService files, SocialService social, ApiKeyService apiKeys, IOptions<PlatformOptions> options) : AppController
 {
     private readonly PlatformOptions _opt = options.Value;
 
@@ -46,8 +46,8 @@ public class DashboardController(AppDbContext db, SiteFileService files, SocialS
         await Run(async () =>
         {
             var items = uploads.Select(f => new UploadItem(f.FileName, f.Length, f.OpenReadStream)).ToList();
-            var n = await files.UploadAsync(site, dir ?? "", items, HttpContext.RequestAborted);
-            Flash($"{n} dosya yüklendi.");
+            var r = await files.UploadAsync(site, dir ?? "", items, HttpContext.RequestAborted);
+            Flash(r.Unchanged == 0 ? $"{r.Written} dosya yüklendi." : $"{r.Written} dosya yüklendi, {r.Unchanged} dosya zaten günceldi.");
         });
         return RedirectToAction(nameof(Index), new { dir });
     }
@@ -149,6 +149,9 @@ public class DashboardController(AppDbContext db, SiteFileService files, SocialS
         return View(new SiteSettingsViewModel
         {
             Name = site.Name,
+            ApiKeyCreatedAt = site.ApiKeyCreatedAt,
+            NewApiKey = TempData["NewApiKey"] as string,
+            ApiBaseUrl = $"{Request.Scheme}://{Request.Host}/api",
             Title = site.Title,
             Description = site.Description,
             Tags = string.Join(", ", site.Tags.Select(t => t.Tag.Name)),
@@ -161,6 +164,8 @@ public class DashboardController(AppDbContext db, SiteFileService files, SocialS
         var site = await MySiteAsync();
         if (site is null) return NotFound();
         model.Name = site.Name;
+        model.ApiKeyCreatedAt = site.ApiKeyCreatedAt;
+        model.ApiBaseUrl = $"{Request.Scheme}://{Request.Host}/api";
         if (!ModelState.IsValid) return View(model);
 
         site.Title = string.IsNullOrWhiteSpace(model.Title) ? null : model.Title.Trim();
@@ -168,6 +173,24 @@ public class DashboardController(AppDbContext db, SiteFileService files, SocialS
         await db.SaveChangesAsync();
         await social.SetTagsAsync(site, SocialService.ParseTags(model.Tags));
         Flash("Ayarlar kaydedildi.");
+        return RedirectToAction(nameof(Settings));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ApiKey(bool revoke = false)
+    {
+        var site = await MySiteAsync();
+        if (site is null) return NotFound();
+        if (revoke)
+        {
+            await apiKeys.RevokeAsync(site);
+            Flash("API anahtarı iptal edildi.");
+        }
+        else
+        {
+            TempData["NewApiKey"] = await apiKeys.RegenerateAsync(site);
+            Flash("Yeni API anahtarı oluşturuldu. Eski anahtar artık çalışmaz.");
+        }
         return RedirectToAction(nameof(Settings));
     }
 

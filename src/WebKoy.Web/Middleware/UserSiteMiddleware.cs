@@ -20,7 +20,7 @@ public class UserSiteMiddleware(RequestDelegate next, IOptions<PlatformOptions> 
 
     private sealed record SiteInfo(int Id, string Name, bool IsBanned);
 
-    public async Task InvokeAsync(HttpContext ctx, AppDbContext db, ViewCounter views)
+    public async Task InvokeAsync(HttpContext ctx, AppDbContext db, ViewCounter views, HitCounter hits)
     {
         var host = ctx.Request.Host.Host.ToLowerInvariant();
         var suffix = "." + _opt.SitesDomain.ToLowerInvariant();
@@ -78,7 +78,13 @@ public class UserSiteMiddleware(RequestDelegate next, IOptions<PlatformOptions> 
             return;
         }
 
-        if (await ServeFileAsync(ctx, site, file, 200) && IsHtml(file.Path))
+        if (!await ServeFileAsync(ctx, site, file, 200))
+        {
+            await ServeNotFoundAsync(ctx, db, site);
+            return;
+        }
+        hits.Record(site.Id);
+        if (IsHtml(file.Path))
             await views.CountAsync(db, site.Id, ctx);
     }
 
