@@ -1,0 +1,24 @@
+@model SiteCardViewModel
+<div class="col">
+    <div class="card h-100 wk-card">
+        <div class="card-body">
+            <h5 class="card-title mb-1">
+                <a href="/site/@Model.Name">@(Model.Title ?? Model.Name)</a>
+            </h5>
+            <a class="small text-muted d-block mb-2 text-truncate" href="@Model.Url" target="_blank" rel="noopener">@Model.Url</a>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="card-text small">@Model.Description</p>
+            }
+            <div>
+                @foreach (var tag in Model.Tags)
+                {
+                    <a class="badge wk-tag" href="/browse?tag=@tag">#@tag</a>
+                }
+            </div>
+        </div>
+        <div class="card-footer small text-muted d-flex justify-content-between">
+            <span>👁 @Model.Views.ToString("N0") · ♥ @Model.Likes · @Model.Followers takipçi</span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+@model BrowseViewModel
+@{
+    ViewData["Title"] = "Siteleri keşfet";
+    var sorts = new (string Key, string Label)[] { ("updated", "Son güncellenen"), ("new", "En yeni"), ("views", "En çok görüntülenen"), ("likes", "En çok beğenilen"), ("followers", "En çok takip edilen") };
+}
+<h2>Siteleri keşfet</h2>
+<form method="get" class="row g-2 align-items-end my-3">
+    <div class="col-md-5"><input class="form-control" name="q" value="@Model.Query" placeholder="Site ara..." /></div>
+    <div class="col-md-3">
+        <select class="form-select" name="sort">
+            @foreach (var s in sorts)
+            {
+                <option value="@s.Key" selected="@(s.Key == Model.Sort)">@s.Label</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2"><input class="form-control" name="tag" value="@Model.Tag" placeholder="etiket" /></div>
+    <div class="col-md-2"><button class="btn btn-wk w-100">Filtrele</button></div>
+</form>
+
+@if (Model.PopularTags.Count > 0)
+{
+    <div class="mb-3">
+        @foreach (var t in Model.PopularTags)
+        {
+            <a class="badge wk-tag @(t == Model.Tag ? "active" : "")" href="?tag=@t&sort=@Model.Sort">#@t</a>
+        }
+    </div>
+}
+
+@if (Model.Sites.Count == 0)
+{
+    <p class="text-muted">Bu ölçütlere uyan site bulunamadı.</p>
+}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+    @foreach (var s in Model.Sites) { <partial name="_SiteCard" model="s" /> }
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center flex-wrap">
+            @for (var i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link" href="?page=@i&sort=@Model.Sort&tag=@Model.Tag&q=@Model.Query">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

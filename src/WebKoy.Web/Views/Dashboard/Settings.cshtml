@@ -1,0 +1,37 @@
+@model SiteSettingsViewModel
+@{ ViewData["Title"] = "Site ayarları"; }
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h2>Site ayarları</h2>
+        <form method="post" class="mb-5">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Tags" class="form-label"></label>
+                <input asp-for="Tags" class="form-control" placeholder="sanat, oyun, blog" />
+            </div>
+            <button class="btn btn-wk">Kaydet</button>
+        </form>
+
+        <div class="card border-danger">
+            <div class="card-body">
+                <h5 class="text-danger">Hesabı sil</h5>
+                <p class="small">Siteniz, tüm dosyalarınız, yorumlarınız ve takipleriniz kalıcı olarak silinir. Bu işlem geri alınamaz.</p>
+                <form asp-controller="Account" asp-action="Delete" method="post" class="d-flex gap-2">
+                    <input class="form-control" name="confirmName" placeholder="Onay için site adınızı yazın: @Model.Name" required />
+                    <button class="btn btn-danger text-nowrap">Kalıcı olarak sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

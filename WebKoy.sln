@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9A60C0A2-CEC2-4618-ACA5-3AEA9EF980C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebKoy.Web", "src\WebKoy.Web\WebKoy.Web.csproj", "{C91339F2-7C42-47A2-8C5C-857332FF2701}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{05A9D1DF-3859-4351-853B-972DCA8C35F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebKoy.Tests", "tests\WebKoy.Tests\WebKoy.Tests.csproj", "{DBED3058-39BB-47EB-8D92-9CF0ED9AAFCC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C91339F2-7C42-47A2-8C5C-857332FF2701}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C91339F2-7C42-47A2-8C5C-857332FF2701}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C91339F2-7C42-47A2-8C5C-857332FF2701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C91339F2-7C42-47A2-8C5C-857332FF2701}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBED3058-39BB-47EB-8D92-9CF0ED9AAFCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBED3058-39BB-47EB-8D92-9CF0ED9AAFCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBED3058-39BB-47EB-8D92-9CF0ED9AAFCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBED3058-39BB-47EB-8D92-9CF0ED9AAFCC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C91339F2-7C42-47A2-8C5C-857332FF2701} = {9A60C0A2-CEC2-4618-ACA5-3AEA9EF980C1}
+		{DBED3058-39BB-47EB-8D92-9CF0ED9AAFCC} = {05A9D1DF-3859-4351-853B-972DCA8C35F2}
+	EndGlobalSection
+EndGlobal

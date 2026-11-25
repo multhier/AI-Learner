@@ -1,0 +1,64 @@
+@model EditFileViewModel
+@{
+    ViewData["Title"] = Model.Path;
+    var mode = Model.Language switch
+    {
+        "html" or "htm" or "svg" or "xml" => "htmlmixed",
+        "css" => "css",
+        "js" or "mjs" or "json" or "webmanifest" or "map" => "javascript",
+        "md" => "markdown",
+        _ => "null",
+    };
+}
+@section Head {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <h4 class="mb-0 text-break">@Model.Path</h4>
+    <div class="d-flex gap-2 align-items-center">
+        <span id="status" class="small text-muted"></span>
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Index" asp-route-dir="@SitePath.Parent(Model.Path)">Geri</a>
+        <a class="btn btn-outline-secondary btn-sm" href="@Model.SiteUrl" target="_blank" rel="noopener">Görüntüle ↗</a>
+        <button class="btn btn-wk btn-sm" id="save">Kaydet (Ctrl+S)</button>
+    </div>
+</div>
+<form id="editForm" asp-action="Save" method="post">
+    <input type="hidden" name="path" value="@Model.Path" />
+    <textarea id="content" name="content" class="form-control font-monospace" rows="25" spellcheck="false">@Model.Content</textarea>
+</form>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+<script>
+(() => {
+    const textarea = document.getElementById('content');
+    const status = document.getElementById('status');
+    const form = document.getElementById('editForm');
+    const editor = window.CodeMirror
+        ? CodeMirror.fromTextArea(textarea, { mode: '@mode', lineNumbers: true, lineWrapping: true, indentUnit: 2, tabSize: 2 })
+        : null;
+    let dirty = false;
+    if (editor) editor.on('change', () => { dirty = true; status.textContent = 'Kaydedilmemiş değişiklikler'; });
+    else textarea.addEventListener('input', () => { dirty = true; status.textContent = 'Kaydedilmemiş değişiklikler'; });
+
+    async function save() {
+        if (editor) editor.save();
+        status.textContent = 'Kaydediliyor...';
+        const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+        const data = await res.json().catch(() => ({ ok: false, error: 'Sunucu hatası' }));
+        if (data.ok) { dirty = false; status.textContent = 'Kaydedildi ✓'; }
+        else status.textContent = 'Hata: ' + data.error;
+    }
+    document.getElementById('save').addEventListener('click', save);
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(); }
+    });
+    window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+})();
+</script>
+}

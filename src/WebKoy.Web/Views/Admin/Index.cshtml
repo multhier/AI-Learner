@@ -1,0 +1,42 @@
+@model List<Report>
+@{
+    ViewData["Title"] = "Yönetim";
+    var resolved = (bool)ViewBag.Resolved;
+}
+<h2>Yönetim</h2>
+<p class="text-muted">Toplam @ViewBag.SiteCount site · @ViewBag.BannedCount askıda</p>
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link @(!resolved ? "active" : "")" asp-action="Index">Açık şikayetler</a></li>
+    <li class="nav-item"><a class="nav-link @(resolved ? "active" : "")" asp-action="Index" asp-route-resolved="true">Çözülenler</a></li>
+</ul>
+@if (Model.Count == 0)
+{
+    <p>Şikayet yok. 🎉</p>
+}
+<div class="table-responsive">
+<table class="table align-middle">
+    <thead><tr><th>Site</th><th>Sebep</th><th>Ayrıntı</th><th>Bildiren</th><th>Tarih</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var r in Model)
+    {
+        <tr>
+            <td><a href="/site/@r.Site.Name">@r.Site.Name</a>@if (r.Site.IsBanned) { <span class="badge bg-danger ms-1">askıda</span> }</td>
+            <td>@r.Reason</td>
+            <td class="small" style="max-width: 320px">@r.Details</td>
+            <td class="small">@(r.Reporter?.UserName ?? "anonim")</td>
+            <td class="small">@r.CreatedAt.ToLocalTime().ToString("g")</td>
+            <td class="text-nowrap">
+                @if (!r.Resolved)
+                {
+                    <form asp-action="Resolve" method="post" class="d-inline"><input type="hidden" name="id" value="@r.Id" /><button class="btn btn-sm btn-outline-secondary">Yoksay</button></form>
+                    @if (!r.Site.IsBanned)
+                    {
+                        <form asp-action="Ban" method="post" class="d-inline"><input type="hidden" name="name" value="@r.Site.Name" /><input type="hidden" name="reason" value="@r.Reason" /><button class="btn btn-sm btn-danger">Askıya al</button></form>
+                    }
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

@@ -1,0 +1,33 @@
+@model HomeViewModel
+@{ ViewData["Title"] = "Ana sayfa"; }
+<section class="wk-hero text-center py-5">
+    <h1 class="display-5 fw-bold">İnternette kendine ait bir köşe.</h1>
+    <p class="lead mx-auto" style="max-width: 640px">
+        WebKöy'de ücretsiz bir site aç, HTML, CSS ve JavaScript'le istediğin gibi tasarla.
+        Reklam yok, algoritma yok, yalnızca senin sayfan.
+    </p>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a class="btn btn-wk btn-lg" asp-controller="Dashboard" asp-action="Index">Panelime git</a>
+    }
+    else
+    {
+        <a class="btn btn-wk btn-lg" asp-controller="Account" asp-action="Register">Hemen site aç</a>
+    }
+    <p class="text-muted mt-3">Şu ana kadar @Model.SiteCount.ToString("N0") site açıldı.</p>
+</section>
+
+<section class="row g-4 my-4 text-center">
+    <div class="col-md-4"><h4>📁 Dosya yöneticisi</h4><p>Dosya ve klasörleri tarayıcıdan yükle, taşı, yeniden adlandır.</p></div>
+    <div class="col-md-4"><h4>✏️ Tarayıcıda düzenle</h4><p>Kod düzenleyiciyle sayfalarını doğrudan panelden düzenle.</p></div>
+    <div class="col-md-4"><h4>🌱 Topluluk</h4><p>Siteleri keşfet, takip et, beğen ve yorum bırak.</p></div>
+</section>
+
+@if (Model.Recent.Count > 0)
+{
+    <h3 class="mt-5 mb-3">Son güncellenen siteler</h3>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+        @foreach (var s in Model.Recent) { <partial name="_SiteCard" model="s" /> }
+    </div>
+    <p class="mt-3"><a asp-action="Browse">Tüm siteleri gör →</a></p>
+}

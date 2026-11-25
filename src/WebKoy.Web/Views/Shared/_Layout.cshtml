@@ -1,0 +1,75 @@
+@{
+    var isAdmin = User.IsInRole(DbInitializer.AdminRole);
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] is string t ? t + " · " : "")WebKöy</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-md wk-nav">
+        <div class="container">
+            <a class="navbar-brand wk-brand" asp-controller="Home" asp-action="Index">WebKöy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-label="Menü">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Browse">Siteleri keşfet</a></li>
+                    @if (isAdmin)
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index">Yönetim</a></li>
+                    }
+                </ul>
+                <ul class="navbar-nav">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Dashboard" asp-action="Index">Panelim</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/site/@User.Identity.Name">Profilim</a></li>
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button class="btn btn-link nav-link" type="submit">Çıkış</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Giriş</a></li>
+                        <li class="nav-item"><a class="btn btn-wk ms-md-2" asp-controller="Account" asp-action="Register">Ücretsiz site aç</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="container py-4">
+    @if (TempData["Success"] is string ok)
+    {
+        <div class="alert alert-success">@ok</div>
+    }
+    @if (TempData["Error"] is string err)
+    {
+        <div class="alert alert-danger">@err</div>
+    }
+    @RenderBody()
+</main>
+
+<footer class="wk-footer">
+    <div class="container d-flex flex-wrap gap-3 justify-content-between">
+        <span>&copy; @DateTime.UtcNow.Year WebKöy · Kişisel web siteleri için ücretsiz yuva</span>
+        <a asp-controller="Home" asp-action="Terms">Kullanım koşulları</a>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

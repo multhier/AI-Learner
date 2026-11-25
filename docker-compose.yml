@@ -1,0 +1,30 @@
+# Yerel geliştirme/deneme için. Üretimde parolaları .env veya gizli anahtar yöneticisinden verin.
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SA_PASSWORD:-WebKoy_Dev_123!}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql:/var/opt/mssql
+
+  web:
+    build: .
+    depends_on: [db]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: "Server=db;Database=WebKoy;User Id=sa;Password=${SA_PASSWORD:-WebKoy_Dev_123!};TrustServerCertificate=True;MultipleActiveResultSets=True"
+      Platform__SitesDomain: sites.localhost
+      Platform__SitesScheme: http
+      Platform__SitesPortSuffix: ":8080"
+      Platform__RequireConfirmedEmail: "false"
+    ports:
+      - "8080:8080"
+    volumes:
+      - sitedata:/data
+
+volumes:
+  mssql:
+  sitedata:

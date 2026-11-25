@@ -1,0 +1,25 @@
+:root {
+  --wk-green: #2e7d4f;
+  --wk-green-dark: #22603c;
+  --wk-cream: #fbf8f1;
+  --wk-ink: #1f2a24;
+}
+html { font-size: 15px; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+body { background: var(--wk-cream); color: var(--wk-ink); display: flex; flex-direction: column; min-height: 100vh; }
+main { flex: 1; }
+a { color: var(--wk-green); }
+.wk-nav { background: #fff; border-bottom: 2px solid var(--wk-green); }
+.wk-brand { font-weight: 800; color: var(--wk-green) !important; letter-spacing: -0.5px; }
+.btn-wk { background: var(--wk-green); color: #fff; border: none; }
+.btn-wk:hover, .btn-wk:focus { background: var(--wk-green-dark); color: #fff; }
+.wk-hero h1 { color: var(--wk-green-dark); }
+.wk-card { border: 1px solid #e3dccb; box-shadow: 0 1px 0 #e3dccb; }
+.wk-tag { background: #e8f2ec; color: var(--wk-green-dark); text-decoration: none; margin: 0 4px 4px 0; font-weight: 500; }
+.wk-tag.active, .wk-tag:hover { background: var(--wk-green); color: #fff; }
+.wk-dropzone { border: 2px dashed #c9bfa6; border-radius: 8px; padding: 1.25rem; background: #fff; text-align: center; transition: background .15s; }
+.wk-dropzone.over { background: #e8f2ec; border-color: var(--wk-green); }
+.wk-files td { word-break: break-all; }
+.wk-preview { border: 1px solid #e3dccb; border-radius: 6px; overflow: hidden; background: #fff; }
+.wk-footer { border-top: 1px solid #e3dccb; padding: 1rem 0; font-size: .9rem; color: #6b6b6b; background: #fff; }
+.CodeMirror { height: 70vh; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }

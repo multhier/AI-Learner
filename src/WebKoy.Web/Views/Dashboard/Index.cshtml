@@ -1,0 +1,137 @@
+@model DashboardViewModel
+@{ ViewData["Title"] = "Panelim"; }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h2 class="mb-0">@Model.Site.Name</h2>
+        <a href="@Model.SiteUrl" target="_blank" rel="noopener">@Model.SiteUrl ↗</a>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Settings">Site ayarları</a>
+        <a class="btn btn-outline-secondary" href="/site/@Model.Site.Name">Profil</a>
+    </div>
+</div>
+
+@if (Model.Site.IsBanned)
+{
+    <div class="alert alert-danger">Siteniz askıya alındı. @Model.Site.BanReason</div>
+}
+
+<div class="row g-3 mb-3 small">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between"><span>Depolama</span><span>@Format.Bytes(Model.Site.StorageBytes) / @Format.Bytes(Model.QuotaBytes)</span></div>
+        <div class="progress" role="progressbar" aria-valuenow="@Model.UsagePercent" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar @(Model.UsagePercent > 90 ? "bg-danger" : "bg-success")" style="width: @(Model.UsagePercent)%"></div>
+        </div>
+    </div>
+    <div class="col-md-4 text-md-end">👁 @Model.Site.Views.ToString("N0") görüntülenme</div>
+</div>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">/</a></li>
+        @foreach (var (name, path) in Model.Breadcrumbs)
+        {
+            <li class="breadcrumb-item"><a asp-action="Index" asp-route-dir="@path">@name</a></li>
+        }
+    </ol>
+</nav>
+
+<div class="wk-dropzone mb-3" id="dropzone">
+    <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm" class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
+        <input type="hidden" name="dir" value="@Model.Dir" />
+        <span>Dosyaları buraya sürükleyin ya da</span>
+        <label class="btn btn-wk btn-sm mb-0">Dosya seç<input type="file" name="files" multiple hidden id="fileInput" /></label>
+        <label class="btn btn-outline-secondary btn-sm mb-0">Klasör seç<input type="file" name="files" webkitdirectory multiple hidden id="dirInput" /></label>
+        <span class="text-muted">(dosya başına en fazla @Format.Bytes(Model.MaxFileBytes))</span>
+    </form>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <form asp-action="NewFile" method="post" class="d-flex gap-1">
+        <input type="hidden" name="dir" value="@Model.Dir" />
+        <input class="form-control form-control-sm" name="name" placeholder="yeni-sayfa.html" required />
+        <button class="btn btn-sm btn-outline-secondary text-nowrap">Yeni dosya</button>
+    </form>
+    <form asp-action="NewFolder" method="post" class="d-flex gap-1">
+        <input type="hidden" name="dir" value="@Model.Dir" />
+        <input class="form-control form-control-sm" name="name" placeholder="klasor" required />
+        <button class="btn btn-sm btn-outline-secondary text-nowrap">Yeni klasör</button>
+    </form>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover align-middle wk-files">
+    <thead><tr><th>Ad</th><th class="d-none d-md-table-cell">Boyut</th><th class="d-none d-md-table-cell">Güncellenme</th><th class="text-end">İşlemler</th></tr></thead>
+    <tbody>
+    @if (Model.Dir.Length > 0)
+    {
+        <tr><td colspan="4"><a asp-action="Index" asp-route-dir="@SitePath.Parent(Model.Dir)">⬆ Üst klasör</a></td></tr>
+    }
+    @foreach (var f in Model.Items)
+    {
+        var name = SitePath.FileName(f.Path);
+        <tr>
+            <td>
+                @if (f.IsDirectory)
+                {
+                    <a asp-action="Index" asp-route-dir="@f.Path">📁 @name</a>
+                }
+                else
+                {
+                    <a href="@Model.SiteUrl@Uri.EscapeDataString(f.Path).Replace("%2F", "/")" target="_blank" rel="noopener">📄 @name</a>
+                }
+            </td>
+            <td class="d-none d-md-table-cell small text-muted">@(f.IsDirectory ? "—" : Format.Bytes(f.Size))</td>
+            <td class="d-none d-md-table-cell small text-muted">@f.UpdatedAt.ToLocalTime().ToString("g")</td>
+            <td class="text-end text-nowrap">
+                @if (!f.IsDirectory && FileTypePolicy.IsEditableText(f.Path))
+                {
+                    <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-path="@f.Path">Düzenle</a>
+                }
+                @if (f.Path != "index.html")
+                {
+                    <form asp-action="Rename" method="post" class="d-inline js-rename">
+                        <input type="hidden" name="path" value="@f.Path" />
+                        <input type="hidden" name="newPath" value="@f.Path" />
+                        <button class="btn btn-sm btn-outline-secondary">Ad değiştir</button>
+                    </form>
+                    <form asp-action="Delete" method="post" class="d-inline js-delete" data-name="@name">
+                        <input type="hidden" name="path" value="@f.Path" />
+                        <button class="btn btn-sm btn-outline-danger">Sil</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>
+
+@section Scripts {
+<script>
+(() => {
+    const form = document.getElementById('uploadForm');
+    const zone = document.getElementById('dropzone');
+    document.getElementById('fileInput').addEventListener('change', () => form.submit());
+    document.getElementById('dirInput').addEventListener('change', () => form.submit());
+    ['dragenter', 'dragover'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.add('over'); }));
+    ['dragleave', 'drop'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.remove('over'); }));
+    zone.addEventListener('drop', ev => {
+        if (!ev.dataTransfer.files.length) return;
+        const input = document.getElementById('fileInput');
+        input.files = ev.dataTransfer.files;
+        document.getElementById('dirInput').disabled = true;
+        form.submit();
+    });
+    document.querySelectorAll('.js-delete').forEach(f => f.addEventListener('submit', ev => {
+        if (!confirm(`"${f.dataset.name}" silinsin mi? Klasörse içindekiler de silinir.`)) ev.preventDefault();
+    }));
+    document.querySelectorAll('.js-rename').forEach(f => f.addEventListener('submit', ev => {
+        const field = f.querySelector('[name=newPath]');
+        const value = prompt('Yeni yol (klasöre taşımak için "klasor/dosya.html"):', field.value);
+        if (!value || value === field.value) { ev.preventDefault(); return; }
+        field.value = value;
+    }));
+})();
+</script>
+}
