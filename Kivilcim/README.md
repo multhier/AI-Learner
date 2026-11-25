@@ -102,6 +102,12 @@ bağlantı dizesi `ConnectionStrings__DefaultConnection` ortam değişkeniyle ve
 `.github/workflows/kivilcim.yml`: `kivilcim` dalına her push'ta projeyi derler, yayın paketini oluşturur,
 gerçek bir SQL Server 2022 konteyneriyle başlatıp ana sayfaları kontrol eder.
 
+## Veritabanı şeması
+
+![Veritabanı şeması](docs/veritabani.png)
+
+Tabloların açıklaması: [docs/VERITABANI.md](docs/VERITABANI.md)
+
 ## Proje yapısı
 
 ```

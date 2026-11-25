@@ -63,6 +63,9 @@ dotnet new mvc --auth Individual -o Kivilcim
 | **Message** | Özel mesajlar |
 
 - **Bu şu demektir:** **Her sınıf = veritabanında bir tablo**, **her özellik = tabloda bir sütun.**
+- Tabloların ve aralarındaki bağlantıların görseli: [docs/VERITABANI.md](docs/VERITABANI.md)
+
+![Veritabanı şeması](docs/veritabani.png)
 - Örnek:
 
 ```csharp

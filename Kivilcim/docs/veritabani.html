@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kıvılcım Veritabanı Şeması</title>
+<style>
+  :root {
+    --bg: #ffffff; --text: #1b2433; --muted: #6b7686; --line: #dfe5ee;
+    --user: #ff6a3d; --content: #3b7dd8; --interact: #1f9d6b; --social: #8a4fd8; --tag: #c58a00;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", Inter, Arial, sans-serif; }
+  #canvas { position: relative; width: 1760px; height: 1130px; margin: 0 auto; }
+  h1 { position: absolute; left: 40px; top: 18px; margin: 0; font-size: 30px; }
+  h1 small { font-size: 16px; font-weight: 400; color: var(--muted); margin-left: 8px; }
+  svg#wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .card {
+    position: absolute; width: 360px; background: #fff; border: 2px solid var(--c); border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(20, 40, 80, .10); overflow: hidden; z-index: 1;
+  }
+  .card header {
+    background: var(--c); color: #fff; padding: 8px 12px; font-weight: 700; font-size: 17px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .card header span { font-weight: 400; font-size: 12.5px; opacity: .92; }
+  .card table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .card td { padding: 4px 10px; border-top: 1px solid var(--line); white-space: nowrap; }
+  .card tr:nth-child(even) td { background: #f7f9fc; }
+  .card td.k { width: 30px; text-align: center; font-size: 11px; font-weight: 700; }
+  .card td.t { color: var(--muted); font-family: Consolas, "Courier New", monospace; font-size: 12px; text-align: right; }
+  .pk { color: #b8860b; } .fk { color: #3b7dd8; } .uk { color: #8a4fd8; }
+  .note { color: var(--muted); font-size: 11.5px; }
+  .lbl { font-size: 12.5px; font-weight: 600; paint-order: stroke; stroke: #fff; stroke-width: 5px; }
+  .card-n { font-size: 12px; font-weight: 800; }
+  .legend {
+    position: absolute; left: 40px; bottom: 22px; display: flex; gap: 22px; flex-wrap: wrap;
+    font-size: 14px; color: var(--muted); align-items: center;
+  }
+  .legend b { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 6px; }
+</style>
+</head>
+<body>
+<div id="canvas">
+  <h1>✦ Kıvılcım · Veritabanı Şeması <small>Microsoft SQL Server · 10 uygulama tablosu</small></h1>
+  <svg id="wires"></svg>
+
+  <!-- 1. satır -->
+  <div class="card" id="Follows" style="--c:var(--social);left:40px;top:90px">
+    <header>Follows <span>takip</span></header>
+    <table>
+      <tr><td class="k pk">PK FK</td><td>FollowerId <span class="note">takip eden</span></td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k pk">PK FK</td><td>FolloweeId <span class="note">takip edilen</span></td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
+    </table>
+  </div>
+  <div class="card" id="HiddenTags" style="--c:var(--tag);left:470px;top:90px">
+    <header>HiddenTags <span>gizlenen etiketler</span></header>
+    <table>
+      <tr><td class="k pk">PK FK</td><td>UserId</td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k pk">PK</td><td>TagName</td><td class="t">nvarchar(50)</td></tr>
+    </table>
+  </div>
+  <div class="card" id="Messages" style="--c:var(--social);left:900px;top:90px">
+    <header>Messages <span>özel mesajlar</span></header>
+    <table>
+      <tr><td class="k pk">PK</td><td>Id</td><td class="t">int</td></tr>
+      <tr><td class="k fk">FK</td><td>SenderId <span class="note">gönderen</span></td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k fk">FK</td><td>RecipientId <span class="note">alan</span></td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k"></td><td>Body</td><td class="t">nvarchar(4000)</td></tr>
+      <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
+      <tr><td class="k"></td><td>ReadAt <span class="note">okunma</span></td><td class="t">datetime2</td></tr>
+    </table>
+  </div>
+  <div class="card" id="Notifications" style="--c:var(--social);left:1360px;top:90px">
+    <header>Notifications <span>bildirimler</span></header>
+    <table>
+      <tr><td class="k pk">PK</td><td>Id</td><td class="t">int</td></tr>
+      <tr><td class="k fk">FK</td><td>RecipientId <span class="note">alan</span></td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k fk">FK</td><td>ActorId <span class="note">yapan</span></td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k"></td><td>Type <span class="note">beğeni/reblog/yanıt/takip</span></td><td class="t">int</td></tr>
+      <tr><td class="k fk">FK</td><td>PostId</td><td class="t">int</td></tr>
+      <tr><td class="k"></td><td>IsRead</td><td class="t">bit</td></tr>
+      <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
+    </table>
+  </div>
+
+  <!-- 2. satır -->
+  <div class="card" id="AspNetUsers" style="--c:var(--user);left:470px;top:440px">
+    <header>AspNetUsers <span>kullanıcılar</span></header>
+    <table>
+      <tr><td class="k pk">PK</td><td>Id</td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k"></td><td>UserName</td><td class="t">nvarchar(256)</td></tr>
+      <tr><td class="k"></td><td>Email</td><td class="t">nvarchar(256)</td></tr>
+      <tr><td class="k"></td><td>PasswordHash <span class="note">şifre özeti</span></td><td class="t">nvarchar(max)</td></tr>
+      <tr><td class="k uk">UK</td><td>BlogName</td><td class="t">nvarchar(32)</td></tr>
+      <tr><td class="k"></td><td>DisplayName</td><td class="t">nvarchar(64)</td></tr>
+      <tr><td class="k"></td><td>Bio</td><td class="t">nvarchar(500)</td></tr>
+      <tr><td class="k"></td><td>AvatarPath</td><td class="t">nvarchar(300)</td></tr>
+      <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
+      <tr><td class="k"></td><td colspan="2" class="note">+ Identity alanları (kilit, 2FA, telefon...)</td></tr>
+    </table>
+  </div>
+  <div class="card" id="Posts" style="--c:var(--content);left:900px;top:440px">
+    <header>Posts <span>gönderiler</span></header>
+    <table>
+      <tr><td class="k pk">PK</td><td>Id</td><td class="t">int</td></tr>
+      <tr><td class="k fk">FK</td><td>AuthorId <span class="note">yazar</span></td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k"></td><td>Type <span class="note">metin/foto/alıntı/link/video</span></td><td class="t">int</td></tr>
+      <tr><td class="k"></td><td>Title</td><td class="t">nvarchar(200)</td></tr>
+      <tr><td class="k"></td><td>Body</td><td class="t">nvarchar(max)</td></tr>
+      <tr><td class="k"></td><td>ImagePath</td><td class="t">nvarchar(300)</td></tr>
+      <tr><td class="k"></td><td>VideoPath</td><td class="t">nvarchar(300)</td></tr>
+      <tr><td class="k"></td><td>LinkUrl</td><td class="t">nvarchar(2000)</td></tr>
+      <tr><td class="k fk">FK</td><td>ReblogOfId <span class="note">asıl gönderi</span></td><td class="t">int</td></tr>
+      <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
+    </table>
+  </div>
+  <div class="card" id="PostTags" style="--c:var(--tag);left:1360px;top:540px">
+    <header>PostTags <span>gönderi ↔ etiket</span></header>
+    <table>
+      <tr><td class="k pk">PK FK</td><td>PostId</td><td class="t">int</td></tr>
+      <tr><td class="k pk">PK FK</td><td>TagId</td><td class="t">int</td></tr>
+    </table>
+  </div>
+
+  <!-- 3. satır -->
+  <div class="card" id="Likes" style="--c:var(--interact);left:470px;top:860px">
+    <header>Likes <span>beğeniler</span></header>
+    <table>
+      <tr><td class="k pk">PK FK</td><td>UserId</td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k pk">PK FK</td><td>PostId</td><td class="t">int</td></tr>
+      <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
+    </table>
+  </div>
+  <div class="card" id="Replies" style="--c:var(--interact);left:900px;top:860px">
+    <header>Replies <span>yanıtlar</span></header>
+    <table>
+      <tr><td class="k pk">PK</td><td>Id</td><td class="t">int</td></tr>
+      <tr><td class="k fk">FK</td><td>PostId</td><td class="t">int</td></tr>
+      <tr><td class="k fk">FK</td><td>UserId</td><td class="t">nvarchar(450)</td></tr>
+      <tr><td class="k"></td><td>Body</td><td class="t">nvarchar(2000)</td></tr>
+      <tr><td class="k"></td><td>CreatedAt</td><td class="t">datetime2</td></tr>
+    </table>
+  </div>
+  <div class="card" id="Tags" style="--c:var(--tag);left:1360px;top:860px">
+    <header>Tags <span>etiketler</span></header>
+    <table>
+      <tr><td class="k pk">PK</td><td>Id</td><td class="t">int</td></tr>
+      <tr><td class="k uk">UK</td><td>Name</td><td class="t">nvarchar(50)</td></tr>
+    </table>
+  </div>
+
+  <div class="legend">
+    <span><b style="background:var(--user)"></b>Kullanıcı</span>
+    <span><b style="background:var(--content)"></b>İçerik</span>
+    <span><b style="background:var(--interact)"></b>Etkileşim</span>
+    <span><b style="background:var(--social)"></b>Sosyal</span>
+    <span><b style="background:var(--tag)"></b>Etiket</span>
+    <span><span class="pk">PK</span> birincil anahtar · <span class="fk">FK</span> yabancı anahtar · <span class="uk">UK</span> benzersiz</span>
+    <span><strong style="color:var(--text)">1 ──── N</strong> = bir kayda çok kayıt bağlanır</span>
+  </div>
+</div>
+
+<script>
+  // İlişkiler: [kaynak (1 tarafı), kenar, konum 0-1, hedef (N tarafı), kenar, konum, etiket, renk, etiketin eğrideki yeri]
+  const rels = [
+    ["AspNetUsers", "right", .25, "Posts", "left", .25, "yazar", "--content"],
+    ["AspNetUsers", "top", .15, "Follows", "bottom", .35, "takip eder", "--social"],
+    ["AspNetUsers", "top", .30, "Follows", "bottom", .75, "takip edilir", "--social"],
+    ["AspNetUsers", "top", .50, "HiddenTags", "bottom", .50, "gizler", "--tag"],
+    ["AspNetUsers", "top", .72, "Messages", "bottom", .20, "gönderir", "--social"],
+    ["AspNetUsers", "top", .88, "Messages", "bottom", .45, "alır", "--social"],
+    ["AspNetUsers", "top", .97, "Notifications", "bottom", .15, "alır / tetikler", "--social", .62],
+    ["Posts", "top", .80, "Notifications", "bottom", .55, "hakkında", "--social"],
+    ["Posts", "right", .30, "PostTags", "left", .50, "etiketlenir", "--tag"],
+    ["Tags", "top", .50, "PostTags", "bottom", .50, "kullanılır", "--tag"],
+    ["AspNetUsers", "bottom", .40, "Likes", "top", .40, "beğenir", "--interact"],
+    ["Posts", "bottom", .20, "Likes", "top", .80, "beğenilir", "--interact", .28],
+    ["Posts", "bottom", .60, "Replies", "top", .60, "yanıtlanır", "--interact"],
+    ["AspNetUsers", "bottom", .85, "Replies", "top", .20, "yazar", "--interact", .28],
+  ];
+
+  const canvas = document.getElementById("canvas");
+  const svg = document.getElementById("wires");
+  const NS = "http://www.w3.org/2000/svg";
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const base = canvas.getBoundingClientRect();
+
+  function anchor(id, side, f) {
+    const r = document.getElementById(id).getBoundingClientRect();
+    const x0 = r.left - base.left, y0 = r.top - base.top;
+    switch (side) {
+      case "top": return { x: x0 + r.width * f, y: y0, dx: 0, dy: -1 };
+      case "bottom": return { x: x0 + r.width * f, y: y0 + r.height, dx: 0, dy: 1 };
+      case "left": return { x: x0, y: y0 + r.height * f, dx: -1, dy: 0 };
+      default: return { x: x0 + r.width, y: y0 + r.height * f, dx: 1, dy: 0 };
+    }
+  }
+  function el(tag, attrs, text) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text) e.textContent = text;
+    svg.appendChild(e);
+    return e;
+  }
+
+  for (const [a, as, af, b, bs, bf, label, colorVar, labelAt = .5] of rels) {
+    const p = anchor(a, as, af), q = anchor(b, bs, bf), color = css(colorVar);
+    const k = Math.max(50, Math.min(140, Math.hypot(q.x - p.x, q.y - p.y) * .35));
+    const c1 = { x: p.x + p.dx * k, y: p.y + p.dy * k }, c2 = { x: q.x + q.dx * k, y: q.y + q.dy * k };
+    el("path", { d: `M${p.x},${p.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${q.x},${q.y}`, fill: "none", stroke: color, "stroke-width": 2.2, opacity: .9 });
+    // Uç işaretleri: 1 tarafı düz çizgi, N tarafı çatal
+    el("circle", { cx: p.x, cy: p.y, r: 4.5, fill: color });
+    el("circle", { cx: q.x, cy: q.y, r: 4.5, fill: "#fff", stroke: color, "stroke-width": 2.2 });
+    el("text", { x: p.x + p.dx * 12 + (p.dy ? 7 : 0), y: p.y + p.dy * 14 + (p.dx ? -6 : 4), class: "card-n", fill: color }, "1");
+    el("text", { x: q.x + q.dx * 14 + (q.dy ? 7 : 0), y: q.y + q.dy * 16 + (q.dx ? -6 : 4), class: "card-n", fill: color }, "N");
+    // Etiket: eğrinin ortası
+    const t = labelAt, mt = 1 - t;
+    const mx = mt ** 3 * p.x + 3 * mt * mt * t * c1.x + 3 * mt * t * t * c2.x + t ** 3 * q.x;
+    const my = mt ** 3 * p.y + 3 * mt * mt * t * c1.y + 3 * mt * t * t * c2.y + t ** 3 * q.y;
+    el("text", { x: mx, y: my + 4, "text-anchor": "middle", class: "lbl", fill: color }, label);
+  }
+
+  // Reblog: Posts kendine bağlanır (sağ alt köşede döngü)
+  {
+    const r = document.getElementById("Posts").getBoundingClientRect();
+    const x = r.left - base.left + r.width, y1 = r.top - base.top + r.height * .78, y2 = r.top - base.top + r.height * .93;
+    const color = css("--content");
+    el("path", { d: `M${x},${y1} C${x + 70},${y1 - 10} ${x + 70},${y2 + 10} ${x},${y2}`, fill: "none", stroke: color, "stroke-width": 2.2, "stroke-dasharray": "6 4" });
+    el("circle", { cx: x, cy: y1, r: 4.5, fill: color });
+    el("circle", { cx: x, cy: y2, r: 4.5, fill: "#fff", stroke: color, "stroke-width": 2.2 });
+    el("text", { x: x + 58, y: (y1 + y2) / 2 + 4, class: "lbl", fill: color }, "reblog");
+  }
+</script>
+</body>
+</html>
