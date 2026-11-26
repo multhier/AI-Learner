@@ -1,0 +1,38 @@
+@model SearchViewModel
+@{ ViewData["Title"] = Model.Query; }
+<h1 class="page-title">"@Model.Query"</h1>
+
+@if (Model.Topics.Count > 0)
+{
+    <h3>ilgili başlıklar</h3>
+    <ul class="topic-list wide">
+        @foreach (var t in Model.Topics)
+        {
+            <li><a href="/baslik/@t.Slug--@t.Id">@t.Title <small>@t.Count</small></a></li>
+        }
+    </ul>
+}
+else
+{
+    <p class="muted">böyle bir başlık yok.</p>
+}
+
+@if (Model.CanCreate)
+{
+    <form action="/baslik/ac" method="post" class="entry-form">
+        @Html.AntiForgeryToken()
+        <h3>bu başlığı sen aç</h3>
+        <input name="Title" value="@Model.Query" maxlength="100" required />
+        <div class="editor-buttons">
+            <button type="button" data-wrap="bkz">(bkz: )</button>
+            <button type="button" data-wrap="hede">`hede`</button>
+            <button type="button" data-wrap="ara">(ara: )</button>
+        </div>
+        <textarea name="Content" rows="6" maxlength="10000" required placeholder="ilk entry"></textarea>
+        <button type="submit" class="primary">başlığı aç</button>
+    </form>
+}
+else if (User.Identity?.IsAuthenticated != true)
+{
+    <p class="muted">başlık açmak için <a href="/giris">giriş yap</a>.</p>
+}

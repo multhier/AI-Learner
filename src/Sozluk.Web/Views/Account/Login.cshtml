@@ -1,0 +1,13 @@
+@model LoginInput
+@{ ViewData["Title"] = "giriş"; }
+<h1 class="page-title">giriş</h1>
+<form method="post" class="auth-form">
+    <div asp-validation-summary="All" class="alert error"></div>
+    <input type="hidden" asp-for="ReturnUrl" />
+    <label asp-for="UserName">nick ya da e-posta</label>
+    <input asp-for="UserName" autocomplete="username" />
+    <label asp-for="Password">şifre</label>
+    <input asp-for="Password" autocomplete="current-password" />
+    <button type="submit" class="primary">giriş</button>
+    <p class="muted">hesabın yok mu? <a href="/kayit">kayıt ol</a></p>
+</form>

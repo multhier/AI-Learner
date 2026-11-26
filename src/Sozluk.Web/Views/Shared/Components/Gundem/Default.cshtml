@@ -1,0 +1,18 @@
+@model List<GundemItem>
+@{
+    var mode = (string)ViewBag.Mode;
+    var label = mode switch { "bugun" => "bugün", "dun" => "dün", _ => "gündem" };
+}
+<h3 class="left-title">@label</h3>
+<ul class="topic-list">
+    @foreach (var t in Model)
+    {
+        <li>
+            <a href="/baslik/@t.Slug--@t.Id@(mode == "bugun" ? "?a=bugun" : "")">@t.Title <small>@t.Count</small></a>
+        </li>
+    }
+    @if (Model.Count == 0)
+    {
+        <li class="muted">henüz bir şey yok</li>
+    }
+</ul>

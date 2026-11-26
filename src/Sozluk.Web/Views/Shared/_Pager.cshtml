@@ -1,0 +1,16 @@
+@model (int Page, int TotalPages, string BaseUrl)
+@if (Model.TotalPages > 1)
+{
+    var sep = Model.BaseUrl.Contains('?') ? "&" : "?";
+    <nav class="pager">
+        @if (Model.Page > 1)
+        {
+            <a href="@(Model.BaseUrl)@(sep)p=@(Model.Page - 1)">«</a>
+        }
+        <span>@Model.Page / @Model.TotalPages</span>
+        @if (Model.Page < Model.TotalPages)
+        {
+            <a href="@(Model.BaseUrl)@(sep)p=@(Model.Page + 1)">»</a>
+        }
+    </nav>
+}

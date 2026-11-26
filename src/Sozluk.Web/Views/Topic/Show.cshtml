@@ -1,0 +1,59 @@
+@model TopicPageViewModel
+@{
+    ViewData["Title"] = Model.Topic.Title;
+    var baseUrl = $"/baslik/{Model.Topic.Slug}--{Model.Topic.Id}";
+    var filter = (Model.Sort.Length > 0 ? $"a={Model.Sort}" : "") +
+                 (Model.Author != null ? $"{(Model.Sort.Length > 0 ? "&" : "")}yazar={Uri.EscapeDataString(Model.Author)}" : "");
+    var pagerBase = filter.Length > 0 ? $"{baseUrl}?{filter}" : baseUrl;
+}
+<h1 class="page-title"><a href="@baseUrl">@Model.Topic.Title</a>
+    @if (Model.Topic.IsLocked) { <small class="muted">(kilitli)</small> }
+</h1>
+<div class="topic-tools">
+    <a href="@baseUrl" class="@(Model.Sort == "" ? "on" : "")">tümü</a>
+    <a href="@baseUrl?a=nice" class="@(Model.Sort == "nice" ? "on" : "")">şükela</a>
+    <a href="@baseUrl?a=bugun" class="@(Model.Sort == "bugun" ? "on" : "")">bugün</a>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a href="@baseUrl?yazar=@Uri.EscapeDataString(User.Name()!)">benimkiler</a>
+    }
+    @if (User.IsModerator())
+    {
+        <form action="/baslik/@Model.Topic.Id/kilit" method="post" class="inline">
+            @Html.AntiForgeryToken()
+            <button class="linklike">@(Model.Topic.IsLocked ? "kilidi aç" : "kilitle")</button>
+        </form>
+    }
+    <partial name="_Pager" model="(Model.Page, Model.TotalPages, pagerBase)" />
+</div>
+
+@foreach (var e in Model.Entries)
+{
+    <partial name="_Entry" model="e" />
+}
+@if (Model.Entries.Count == 0)
+{
+    <p class="muted">bu filtreye uyan entry yok.</p>
+}
+
+<partial name="_Pager" model="(Model.Page, Model.TotalPages, pagerBase)" />
+
+@if (User.Identity?.IsAuthenticated == true && (!Model.Topic.IsLocked || User.IsModerator()))
+{
+    <form action="/entry/ekle" method="post" class="entry-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="TopicId" value="@Model.Topic.Id" />
+        <label for="Content">"@Model.Topic.Title" hakkında bilgi ver</label>
+        <div class="editor-buttons">
+            <button type="button" data-wrap="bkz">(bkz: )</button>
+            <button type="button" data-wrap="hede">`hede`</button>
+            <button type="button" data-wrap="ara">(ara: )</button>
+        </div>
+        <textarea id="Content" name="Content" rows="6" maxlength="10000" required></textarea>
+        <button type="submit" class="primary">yolla</button>
+    </form>
+}
+else if (User.Identity?.IsAuthenticated != true)
+{
+    <p class="muted"><a href="/giris?returnUrl=@Uri.EscapeDataString(baseUrl)">giriş yap</a> ya da <a href="/kayit">kayıt ol</a>, sen de yaz.</p>
+}

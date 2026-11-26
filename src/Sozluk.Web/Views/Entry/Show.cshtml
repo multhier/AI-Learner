@@ -1,0 +1,4 @@
+@model EntryView
+@{ ViewData["Title"] = $"{Model.TopicTitle} - #{Model.Id}"; }
+<partial name="_Entry" model="Model" view-data='new ViewDataDictionary(ViewData) { ["ShowTopic"] = true }' />
+<p><a href="/baslik/@Model.TopicSlug--@Model.TopicId">başlığın tamamı »</a></p>

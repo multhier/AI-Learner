@@ -1,0 +1,55 @@
+@model UserProfileViewModel
+@{
+    ViewData["Title"] = Model.User.UserName;
+    var nick = Uri.EscapeDataString(Model.User.UserName);
+    var roleLabel = Model.User.Role switch
+    {
+        UserRole.Caylak => "çaylak", UserRole.Yazar => "yazar",
+        UserRole.Moderator => "moderatör", _ => "admin"
+    };
+}
+<h1 class="page-title">@Model.User.UserName <small class="muted">@roleLabel@(Model.User.IsBanned ? " · uzaklaştırıldı" : "")</small></h1>
+@if (!string.IsNullOrEmpty(Model.User.Bio))
+{
+    <div class="bio">@EntryFormatter.Format(Model.User.Bio)</div>
+}
+<p class="stats">
+    @Model.EntryCount entry · @Model.TopicCount başlık · @Model.TotalUp artı ·
+    kayıt: @Model.User.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")
+</p>
+<div class="topic-tools">
+    @if (User.Identity?.IsAuthenticated == true && User.Name() != Model.User.UserName)
+    {
+        <a href="/mesaj/@nick">mesaj gönder</a>
+    }
+    @if (User.IsModerator() && User.Name() != Model.User.UserName)
+    {
+        @if (Model.User.Role == UserRole.Caylak)
+        {
+            <form action="/mod/yazar/@nick/rol" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="role" value="Yazar" />
+                <button class="linklike">yazarlığa terfi et</button>
+            </form>
+        }
+        <form action="/mod/yazar/@nick/ban" method="post" class="inline">
+            @Html.AntiForgeryToken()
+            <button class="linklike">@(Model.User.IsBanned ? "uzaklaştırmayı kaldır" : "uzaklaştır")</button>
+        </form>
+    }
+</div>
+<div class="tabs">
+    <a href="/yazar/@nick" class="@(Model.Tab == "entryler" ? "on" : "")">entry'ler</a>
+    <a href="/yazar/@nick?tab=favoriler" class="@(Model.Tab == "favoriler" ? "on" : "")">favoriler</a>
+    <a href="/yazar/@nick?tab=begenilenler" class="@(Model.Tab == "begenilenler" ? "on" : "")">en beğenilenler</a>
+</div>
+@foreach (var e in Model.Entries)
+{
+    <partial name="_Entry" model="e" view-data='new ViewDataDictionary(ViewData) { ["ShowTopic"] = true }' />
+}
+@if (Model.Entries.Count == 0)
+{
+    <p class="muted">burası boş.</p>
+}
+@{ var profileBase = $"/yazar/{nick}?tab={Model.Tab}"; }
+<partial name="_Pager" model="(Model.Page, Model.TotalPages, profileBase)" />

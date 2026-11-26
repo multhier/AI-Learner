@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "moderasyon";
+    var reports = (List<Report>)ViewBag.Reports;
+    var caylaklar = (List<CaylakItem>)ViewBag.Caylaklar;
+}
+<h1 class="page-title">moderasyon</h1>
+
+<h3>açık şikayetler (@reports.Count)</h3>
+@foreach (var r in reports)
+{
+    <div class="report-box">
+        <p><a href="/entry/@r.EntryId">#@r.EntryId</a> ·
+            <a href="/baslik/@r.Entry!.Topic!.Slug--@r.Entry.TopicId">@r.Entry.Topic.Title</a> ·
+            yazar: <a href="/yazar/@Uri.EscapeDataString(r.Entry.Author!.UserName)">@r.Entry.Author.UserName</a>
+            @(r.Entry.IsDeleted ? "(silinmiş)" : "")</p>
+        <blockquote>@EntryFormatter.Format(r.Entry.Content)</blockquote>
+        <p class="muted">şikayet eden: @r.Reporter!.UserName — "@r.Reason"</p>
+        <form action="/mod/sikayet/@r.Id/kapat" method="post" class="inline">
+            @Html.AntiForgeryToken()
+            <button name="deleteEntry" value="true">entry'yi sil ve kapat</button>
+            <button name="deleteEntry" value="false">yok say</button>
+        </form>
+    </div>
+}
+@if (reports.Count == 0)
+{
+    <p class="muted">açık şikayet yok.</p>
+}
+
+<h3>çaylaklar</h3>
+<table class="grid">
+    <tr><th>nick</th><th>entry</th><th>kayıt</th><th></th></tr>
+    @foreach (var c in caylaklar)
+    {
+        var nick = c.UserName;
+        <tr>
+            <td><a href="/yazar/@Uri.EscapeDataString(nick)">@nick</a></td>
+            <td>@c.EntryCount</td>
+            <td>@(c.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy"))</td>
+            <td>
+                <form action="/mod/yazar/@Uri.EscapeDataString(nick)/rol" method="post" class="inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="role" value="Yazar" />
+                    <button>yazar yap</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

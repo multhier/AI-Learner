@@ -1,0 +1,23 @@
+@model List<ConversationItem>
+@{ ViewData["Title"] = "mesajlar"; }
+<h1 class="page-title">mesajlar</h1>
+<form action="" method="get" class="inline" onsubmit="location.href='/mesaj/'+encodeURIComponent(this.nick.value);return false;">
+    <input name="nick" placeholder="nick'e yeni mesaj" required />
+    <button>yaz</button>
+</form>
+<ul class="conversations">
+    @foreach (var c in Model)
+    {
+        <li class="@(c.Unread > 0 ? "unread" : "")">
+            <a href="/mesaj/@Uri.EscapeDataString(c.OtherName)">
+                <strong>@c.OtherName</strong> @(c.Unread > 0 ? $"({c.Unread})" : "")
+                <span class="muted">@(c.LastBody.Length > 80 ? c.LastBody[..80] + "…" : c.LastBody)</span>
+                <small class="muted">@c.LastAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+            </a>
+        </li>
+    }
+    @if (Model.Count == 0)
+    {
+        <li class="muted">henüz mesaj yok.</li>
+    }
+</ul>

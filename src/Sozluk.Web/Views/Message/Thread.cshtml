@@ -1,0 +1,21 @@
+@model MessageThreadViewModel
+@{ ViewData["Title"] = Model.Other.UserName + " ile mesajlar"; }
+<h1 class="page-title"><a href="/mesaj">mesajlar</a> / <a href="/yazar/@Uri.EscapeDataString(Model.Other.UserName)">@Model.Other.UserName</a></h1>
+<div class="thread">
+    @foreach (var m in Model.Messages)
+    {
+        var mine = m.SenderId == User.Id();
+        <div class="msg @(mine ? "mine" : "")">
+            <div>@m.Body</div>
+            <small class="muted">@m.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+        </div>
+    }
+</div>
+@if (Model.Other.Id != User.Id())
+{
+    <form method="post" class="entry-form">
+        @Html.AntiForgeryToken()
+        <textarea name="body" rows="4" maxlength="5000" required></textarea>
+        <button type="submit" class="primary">gönder</button>
+    </form>
+}

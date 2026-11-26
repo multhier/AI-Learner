@@ -1,0 +1,9 @@
+@model User
+@{ ViewData["Title"] = "ayarlar"; }
+<h1 class="page-title">ayarlar</h1>
+<form method="post" class="entry-form">
+    @Html.AntiForgeryToken()
+    <label for="bio">hakkımda (bkz ve `hede` kullanılabilir)</label>
+    <textarea id="bio" name="bio" rows="6" maxlength="1000">@Model.Bio</textarea>
+    <button type="submit" class="primary">kaydet</button>
+</form>

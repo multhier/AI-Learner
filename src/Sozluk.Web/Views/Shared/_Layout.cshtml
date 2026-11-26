@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] is string t ? t + " - sözlük" : "sözlük")</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="logo" href="/">sözlük</a>
+        <form class="search" action="/ara" method="get">
+            <input name="q" placeholder="başlık, #entry, @@yazar" autocomplete="off" value="@Context.Request.Query["q"]" />
+            <button type="submit">ara</button>
+        </form>
+        <nav class="usernav">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a href="/yazar/@Uri.EscapeDataString(User.Name()!)">@User.Name()</a>
+                <a href="/mesaj">mesaj</a>
+                @if (User.IsModerator())
+                {
+                    <a href="/mod">mod</a>
+                }
+                <a href="/ayarlar">ayarlar</a>
+                <form action="/cikis" method="post" class="inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="linklike">çıkış</button>
+                </form>
+            }
+            else
+            {
+                <a href="/giris">giriş</a>
+                <a href="/kayit">kayıt ol</a>
+            }
+        </nav>
+    </div>
+    <div class="subnav">
+        <a href="/?sol=gundem">gündem</a>
+        <a href="/?sol=bugun">bugün</a>
+        <a href="/?sol=dun">dün</a>
+        <a href="/dunun-en-begenilenleri">dünün en beğenilenleri</a>
+        <a href="/rastgele">rastgele</a>
+    </div>
+</header>
+
+<div class="layout">
+    <aside class="left">
+        @await Component.InvokeAsync("Gundem")
+    </aside>
+    <main class="content">
+        @if (TempData["Error"] is string err)
+        {
+            <div class="alert error">@err</div>
+        }
+        @if (TempData["Info"] is string info)
+        {
+            <div class="alert info">@info</div>
+        }
+        @RenderBody()
+    </main>
+</div>
+
+<footer class="footer">sözlük · ASP.NET Core MVC + SQL Server</footer>
+
+<form id="af">@Html.AntiForgeryToken()</form>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

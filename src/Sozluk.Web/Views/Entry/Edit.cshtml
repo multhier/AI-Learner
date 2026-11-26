@@ -1,0 +1,15 @@
+@model Entry
+@{ ViewData["Title"] = "entry düzenle"; }
+<h1 class="page-title"><a href="/baslik/@Model.Topic!.Slug--@Model.TopicId">@Model.Topic.Title</a></h1>
+<form method="post" class="entry-form">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="alert error"></div>
+    <div class="editor-buttons">
+        <button type="button" data-wrap="bkz">(bkz: )</button>
+        <button type="button" data-wrap="hede">`hede`</button>
+        <button type="button" data-wrap="ara">(ara: )</button>
+    </div>
+    <textarea name="content" rows="10" maxlength="10000" required>@Model.Content</textarea>
+    <button type="submit" class="primary">kaydet</button>
+    <a href="/entry/@Model.Id">vazgeç</a>
+</form>

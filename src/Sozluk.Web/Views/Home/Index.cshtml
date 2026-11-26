@@ -1,0 +1,11 @@
+﻿@model EntryListViewModel
+@{ ViewData["Title"] = Model.Heading; }
+<h1 class="page-title">@Model.Heading</h1>
+@foreach (var e in Model.Entries)
+{
+    <partial name="_Entry" model="e" view-data='new ViewDataDictionary(ViewData) { ["ShowTopic"] = true }' />
+}
+@if (Model.Entries.Count == 0)
+{
+    <p class="muted">burada henüz entry yok.</p>
+}

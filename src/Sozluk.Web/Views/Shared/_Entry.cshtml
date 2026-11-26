@@ -1,0 +1,45 @@
+@model EntryView
+@{
+    var showTopic = ViewData["ShowTopic"] as bool? ?? false;
+    var authed = User.Identity?.IsAuthenticated == true;
+}
+<article class="entry" id="e@(Model.Id)" data-id="@Model.Id">
+    @if (showTopic)
+    {
+        <h2 class="entry-topic"><a href="/baslik/@Model.TopicSlug--@Model.TopicId">@Model.TopicTitle</a></h2>
+    }
+    <div class="entry-content">@EntryFormatter.Format(Model.Content)</div>
+    <footer class="entry-footer">
+        <div class="entry-actions">
+            @if (Model.Number is int n)
+            {
+                <span class="muted">@n.</span>
+            }
+            <button class="vote up @(Model.MyVote > 0 ? "on" : "")" data-value="1" @(authed && !Model.IsMine ? "" : "disabled") title="artı">▲ <span>@Model.UpVotes</span></button>
+            <button class="vote down @(Model.MyVote < 0 ? "on" : "")" data-value="-1" @(authed && !Model.IsMine ? "" : "disabled") title="eksi">▼ <span>@Model.DownVotes</span></button>
+            <button class="fav @(Model.IsMyFavorite ? "on" : "")" @(authed ? "" : "disabled") title="favori">★ <span>@Model.FavoriteCount</span></button>
+            @if (authed && !Model.IsMine)
+            {
+                <button class="report linklike" title="şikayet">şikayet</button>
+            }
+            @if (Model.IsMine || User.IsModerator())
+            {
+                <a href="/entry/@Model.Id/duzenle">düzenle</a>
+                <form action="/entry/@Model.Id/sil" method="post" class="inline" onsubmit="return confirm('silinsin mi?')">
+                    @Html.AntiForgeryToken()
+                    <button class="linklike">sil</button>
+                </form>
+            }
+        </div>
+        <div class="entry-meta">
+            <a class="author @(Model.AuthorRole == UserRole.Caylak ? "caylak" : "")" href="/yazar/@Uri.EscapeDataString(Model.AuthorName)">@Model.AuthorName</a>
+            <a class="date" href="/entry/@Model.Id">
+                @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                @if (Model.UpdatedAt is DateTime u)
+                {
+                    <text> ~ @u.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</text>
+                }
+            </a>
+        </div>
+    </footer>
+</article>
