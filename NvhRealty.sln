@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{545E907A-0589-425C-B6B1-F37082578C5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NvhRealty.Web", "src\NvhRealty.Web\NvhRealty.Web.csproj", "{CA4F3A23-8C7A-4715-8E21-145BA900B65F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{15D733F6-DDA9-421B-B4DA-9C8A94C17D68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NvhRealty.Tests", "tests\NvhRealty.Tests\NvhRealty.Tests.csproj", "{6ECB9A41-B293-4021-B90F-581B9640FE7E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA4F3A23-8C7A-4715-8E21-145BA900B65F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA4F3A23-8C7A-4715-8E21-145BA900B65F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA4F3A23-8C7A-4715-8E21-145BA900B65F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA4F3A23-8C7A-4715-8E21-145BA900B65F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ECB9A41-B293-4021-B90F-581B9640FE7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ECB9A41-B293-4021-B90F-581B9640FE7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ECB9A41-B293-4021-B90F-581B9640FE7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ECB9A41-B293-4021-B90F-581B9640FE7E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CA4F3A23-8C7A-4715-8E21-145BA900B65F} = {545E907A-0589-425C-B6B1-F37082578C5E}
+		{6ECB9A41-B293-4021-B90F-581B9640FE7E} = {15D733F6-DDA9-421B-B4DA-9C8A94C17D68}
+	EndGlobalSection
+EndGlobal

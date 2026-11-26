@@ -1,0 +1,29 @@
+@model Listing
+<div class="card listing-card h-100">
+    <a href="/properties/@Model.Id" class="listing-img" style="background-image:url('@Model.MainPhoto()')" aria-label="@Model.DisplayTitle">
+        <span class="badge badge-type">@(Model.Source == ListingSource.Company ? "Şirket" : "MLS")</span>
+        @if (Model.Status != ListingStatus.Active)
+        {
+            <span class="badge badge-status">@Model.Status.DisplayName()</span>
+        }
+        @if (Model.OpenHouseAt is DateTime oh && oh >= DateTime.UtcNow.Date)
+        {
+            <span class="badge badge-open">Açık Ev: @oh.ToString("dd.MM.yyyy HH:mm")</span>
+        }
+    </a>
+    <div class="card-body">
+        <div class="listing-price">@Model.PriceLabel()</div>
+        <h3 class="listing-title"><a href="/properties/@Model.Id">@Model.Address@(string.IsNullOrEmpty(Model.Unit) ? "" : $", #{Model.Unit}")</a></h3>
+        <div class="listing-meta">@Model.PropertyType.DisplayName() · @Model.Neighborhood?.Name</div>
+        <div class="listing-facts">
+            @if (Model.Families is int fm) { <span>@fm FM</span> }
+            @if (!Model.IsCommercial) { <span>@Model.BedsLabel()</span> }
+            <span>@Model.BathsLabel()</span>
+            @if (Model.SquareFeet is int sq) { <span>@sq.ToString("N0") ft²</span> }
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.CourtesyOf))
+    {
+        <div class="card-footer small text-muted">İlan sahibi: @Model.CourtesyOf</div>
+    }
+</div>

@@ -1,0 +1,11 @@
+@model Testimonial
+<blockquote class="testimonial">
+    <p>@Model.Body</p>
+    <footer>
+        <strong>@Model.ClientName</strong>
+        @if (!string.IsNullOrEmpty(Model.Headline)) { <span>, @Model.Headline</span> }
+        @if (!string.IsNullOrEmpty(Model.Location)) { <span>, @Model.Location</span> }
+        <span class="text-muted"> — @Model.Date.ToString("MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</span>
+        @if (Model.Agent is { } a) { <div class="small">Danışman: <a href="/agents/@a.Id">@a.FullName</a></div> }
+    </footer>
+</blockquote>

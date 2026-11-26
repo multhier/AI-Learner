@@ -1,0 +1,7 @@
+@model List<Listing>
+@{ ViewData["Title"] = "Favorilerim"; }
+<section class="page-header"><div class="container"><h1>Favorilerim</h1></div></section>
+<div class="container py-4">
+    @if (Model.Count == 0) { <p>Henüz favori ilanınız yok. <a href="/properties">İlanlara göz atın</a>.</p> }
+    <div class="row g-4">@foreach (var l in Model) { <div class="col-sm-6 col-lg-4"><partial name="_ListingCard" model="l" /></div> }</div>
+</div>

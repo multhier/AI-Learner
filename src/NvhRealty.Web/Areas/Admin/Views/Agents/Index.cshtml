@@ -1,0 +1,19 @@
+@model List<Agent>
+@{ ViewData["Title"] = "Danışmanlar"; }
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="h3 mb-0">Danışmanlar</h1><a href="/admin/agents/create" class="btn btn-primary">+ Yeni danışman</a></div>
+<table class="table table-hover bg-white align-middle">
+    <thead><tr><th>Sıra</th><th></th><th>Ad Soyad</th><th>Ünvan</th><th>Telefon</th><th>Durum</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var a in Model)
+    {
+        <tr>
+            <td>@a.SortOrder</td>
+            <td><img src="@(a.PhotoUrl ?? "/img/agent-placeholder.svg")" alt="" width="40" height="40" class="rounded-circle object-fit-cover" /></td>
+            <td><a href="/agents/@a.Id" target="_blank">@a.FullName</a> @if (a.IsManagement) { <span class="badge text-bg-secondary">Yönetim</span> } @if (a.IsFeatured) { <span class="badge text-bg-info">Anasayfa</span> }</td>
+            <td>@a.Title</td><td>@a.Phone</td>
+            <td>@(a.IsActive ? "Aktif" : "Pasif")</td>
+            <td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" href="/admin/agents/edit/@a.Id">Düzenle</a> <partial name="_DeleteButton" model="@($"/admin/agents/delete/{a.Id}")" /></td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,19 @@
+@model Post
+@{ ViewData["Title"] = Model.Id == 0 ? "Yeni yazı" : Model.Title; }
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+<form method="post" action="/admin/posts/save" class="admin-form">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="row g-3">
+        <div class="col-md-8"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="Category" class="form-label"></label><select asp-for="Category" asp-items="Html.GetEnumSelectList<PostCategory>()" class="form-select"></select></div>
+        <div class="col-md-5"><label asp-for="Slug" class="form-label">Kısa ad (boş bırakılırsa başlıktan üretilir)</label><input asp-for="Slug" class="form-control" /></div>
+        <div class="col-md-3"><label asp-for="Author" class="form-label"></label><input asp-for="Author" class="form-control" /></div>
+        <div class="col-md-2"><label asp-for="PublishedOn" class="form-label"></label><input asp-for="PublishedOn" type="date" class="form-control" /></div>
+        <div class="col-md-2 d-flex align-items-end"><div class="form-check"><input asp-for="IsPublished" class="form-check-input" /><label asp-for="IsPublished" class="form-check-label"></label></div></div>
+        <div class="col-md-8"><label asp-for="Summary" class="form-label"></label><input asp-for="Summary" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="ImageUrl" class="form-label"></label><input asp-for="ImageUrl" class="form-control" /></div>
+        <div class="col-12"><label asp-for="Body" class="form-label"></label><textarea asp-for="Body" rows="14" class="form-control font-monospace"></textarea></div>
+    </div>
+    <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-primary">Kaydet</button><a href="/admin/posts" class="btn btn-link">İptal</a></div>
+</form>

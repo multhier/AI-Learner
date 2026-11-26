@@ -1,0 +1,217 @@
+@model ListingSearchResult
+@{
+    var q = Model.Query;
+    ViewData["Title"] = Model.Heading;
+    var path = Context.Request.Path.Value ?? "/properties";
+
+    string UrlWith(string key, string? value)
+    {
+        var dict = Context.Request.Query.Where(kv => !kv.Key.Equals(key, StringComparison.OrdinalIgnoreCase) && !kv.Key.Equals("page", StringComparison.OrdinalIgnoreCase))
+            .SelectMany(kv => kv.Value.Select(v => new KeyValuePair<string, string?>(kv.Key, v))).ToList();
+        if (value != null) dict.Add(new(key, value));
+        return path + Microsoft.AspNetCore.Http.QueryString.Create(dict).ToUriComponent();
+    }
+    string PageUrl(int p) => UrlWith("page", p.ToString());
+    var currentUrl = path + Context.Request.QueryString.ToUriComponent();
+}
+<section class="page-header"><div class="container"><h1>@Model.Heading</h1></div></section>
+
+<div class="container py-4">
+    <form method="get" action="@path" id="searchForm">
+        @* Sabit filtreler (rota tarafından belirlenenler) hidden alan olarak korunmaz; rota kendisi uygular. *@
+        <input type="hidden" name="Sort" value="@q.Sort" />
+        <input type="hidden" name="View" value="@q.View" />
+        <div class="search-bar row g-2 align-items-end">
+            @if (path == "/properties")
+            {
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="f-type">Tip</label>
+                    <select id="f-type" name="Type" class="form-select">
+                        <option value="">Tümü</option>
+                        <option value="Sale" selected="@(q.Type == ListingType.Sale)">Satılık</option>
+                        <option value="Rental" selected="@(q.Type == ListingType.Rental)">Kiralık</option>
+                    </select>
+                </div>
+            }
+            <div class="col-6 col-md-2">
+                <label class="form-label">Semtler</label>
+                <button type="button" class="btn btn-outline-secondary w-100" data-bs-toggle="modal" data-bs-target="#hoodModal">
+                    Semt seç @(q.Hoods.Count > 0 ? $"({q.Hoods.Count})" : "")
+                </button>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label" for="f-minbeds">Yatak odası</label>
+                <select id="f-minbeds" name="MinBeds" class="form-select">
+                    <option value="">Tüm boyutlar</option>
+                    <option value="0" selected="@(q.MinBeds == 0)">Stüdyo+</option>
+                    @for (var b = 1; b <= 5; b++) { <option value="@b" selected="@(q.MinBeds == b)">@b+ Yatak Odası</option> }
+                </select>
+            </div>
+            <div class="col-6 col-md-2"><label class="form-label" for="f-minp">Min. fiyat</label><input id="f-minp" name="MinPrice" type="number" min="0" value="@q.MinPrice" class="form-control" placeholder="Minimum" /></div>
+            <div class="col-6 col-md-2"><label class="form-label" for="f-maxp">Maks. fiyat</label><input id="f-maxp" name="MaxPrice" type="number" min="0" value="@q.MaxPrice" class="form-control" placeholder="Maksimum" /></div>
+            <div class="col-6 col-md-1"><button type="button" class="btn btn-outline-secondary w-100" data-bs-toggle="collapse" data-bs-target="#moreFilters" aria-expanded="false">Daha</button></div>
+            <div class="col-12 col-md-1"><button type="submit" class="btn btn-primary w-100">Ara</button></div>
+        </div>
+
+        <div class="collapse more-filters mt-3" id="moreFilters">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <h6>Banyo</h6>
+                    <select name="MinBaths" class="form-select form-select-sm">
+                        <option value="">Fark etmez</option>
+                        @foreach (var b in new[] { 1m, 1.5m, 2m, 3m, 4m, 5m }) { <option value="@b.ToString(System.Globalization.CultureInfo.InvariantCulture)" selected="@(q.MinBaths == b)">@b.ToString("0.#")+</option> }
+                    </select>
+                    <h6 class="mt-3">Aile sayısı (Families)</h6>
+                    <select name="MinFamilies" class="form-select form-select-sm">
+                        <option value="">Fark etmez</option>
+                        @for (var f = 1; f <= 5; f++) { <option value="@f" selected="@(q.MinFamilies == f)">@f+</option> }
+                    </select>
+                    <h6 class="mt-3">Min. alan (ft²)</h6>
+                    <input name="MinSqft" type="number" min="0" value="@q.MinSqft" class="form-control form-control-sm" />
+                    <h6 class="mt-3">Maks. aylık gider ($)</h6>
+                    <input name="MaxMonthly" type="number" min="0" value="@q.MaxMonthly" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-3">
+                    <h6>Kaynak</h6>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="Mls" value="true" id="c-mls" checked="@q.Mls" /><label class="form-check-label" for="c-mls">MLS ilanları</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="Company" value="true" id="c-co" checked="@q.Company" /><label class="form-check-label" for="c-co">Şirket ilanları</label></div>
+                    @* MVC checkbox kalıbı: önce checkbox, sonra "false" değerli hidden alan (binder ilk değeri alır) *@
+                    <input type="hidden" name="Mls" value="false" /><input type="hidden" name="Company" value="false" />
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="Exclusive" value="true" id="c-ex" checked="@q.Exclusive" /><label class="form-check-label" for="c-ex">Münhasır ilanlar</label></div>
+                    <h6 class="mt-3">Durum</h6>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="NewListings" value="true" id="c-new" checked="@q.NewListings" /><label class="form-check-label" for="c-new">Yeni ilanlar (14 gün)</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="IncludePending" value="true" id="c-pend" checked="@q.IncludePending" /><label class="form-check-label" for="c-pend">Onay bekleyenler dahil</label></div>
+                    <input type="hidden" name="IncludePending" value="false" />
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="IncludeInContract" value="true" id="c-ic" checked="@q.IncludeInContract" /><label class="form-check-label" for="c-ic">Sözleşmedekiler dahil</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="Sold" value="true" id="c-sold" checked="@q.Sold" /><label class="form-check-label" for="c-sold">Satılanlar</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="Rented" value="true" id="c-rent" checked="@q.Rented" /><label class="form-check-label" for="c-rent">Kiralananlar</label></div>
+                </div>
+                <div class="col-md-3">
+                    <h6>Mülk tipi</h6>
+                    @foreach (var t in new[] { PropertyType.Condo, PropertyType.Coop, PropertyType.Townhouse, PropertyType.House })
+                    {
+                        <div class="form-check"><input class="form-check-input" type="checkbox" name="PropertyTypes" value="@t" id="pt-@t" checked="@q.PropertyTypes.Contains(t)" /><label class="form-check-label" for="pt-@t">@t.DisplayName()</label></div>
+                    }
+                    <h6 class="mt-3">Bina özellikleri</h6>
+                    @foreach (var (name, label, val) in new[] { ("Doorman", "Kapıcı", q.Doorman), ("Elevator", "Asansör", q.Elevator), ("Laundry", "Çamaşırhane", q.Laundry), ("Pool", "Havuz", q.Pool), ("Outdoor", "Açık alan", q.Outdoor), ("Parking", "Otopark", q.Parking) })
+                    {
+                        <div class="form-check"><input class="form-check-input" type="checkbox" name="@name" value="true" id="b-@name" checked="@val" /><label class="form-check-label" for="b-@name">@label</label></div>
+                    }
+                </div>
+                <div class="col-md-3">
+                    <h6>Daire özellikleri</h6>
+                    @foreach (var (name, label, val) in new[] { ("LaundryInUnit", "Dairede çamaşır makinesi", q.LaundryInUnit), ("NoFee", "Komisyonsuz", q.NoFee), ("PrivateOutdoor", "Özel açık alan", q.PrivateOutdoor), ("ShortTerm", "Kısa dönem", q.ShortTerm), ("OpenHouse", "Açık ev", q.OpenHouse), ("VirtualTour", "Sanal tur", q.VirtualTour), ("CentralAc", "Merkezi klima", q.CentralAc) })
+                    {
+                        <div class="form-check"><input class="form-check-input" type="checkbox" name="@name" value="true" id="a-@name" checked="@val" /><label class="form-check-label" for="a-@name">@label</label></div>
+                    }
+                    <h6 class="mt-3">Evcil hayvan</h6>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="Cats" value="true" id="p-cats" checked="@q.Cats" /><label class="form-check-label" for="p-cats">Kedi olur</label></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="Dogs" value="true" id="p-dogs" checked="@q.Dogs" /><label class="form-check-label" for="p-dogs">Köpek olur</label></div>
+                </div>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">İlanları Bul</button>
+                <a href="@path" class="btn btn-link">Temizle</a>
+            </div>
+        </div>
+
+        <div class="modal fade" id="hoodModal" tabindex="-1" aria-labelledby="hoodModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header"><h5 class="modal-title" id="hoodModalLabel">Semtler</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button></div>
+                    <div class="modal-body">
+                        @foreach (var area in Model.Areas)
+                        {
+                            <fieldset class="mb-3">
+                                <legend class="h6 d-flex align-items-center gap-2">
+                                    <input type="checkbox" class="form-check-input area-toggle" data-area="@area.Id" id="area-@area.Id" />
+                                    <label for="area-@area.Id">@area.Name</label>
+                                </legend>
+                                <div class="hood-grid">
+                                    @foreach (var n in area.Neighborhoods)
+                                    {
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="Hoods" value="@n.Id" id="h-@n.Id" data-area="@area.Id" checked="@q.Hoods.Contains(n.Id)" /><label class="form-check-label" for="h-@n.Id">@n.Name</label></div>
+                                    }
+                                </div>
+                            </fieldset>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link" id="clearHoods">Temizle</button>
+                        <button type="submit" class="btn btn-primary">Uygula</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="results-toolbar d-flex flex-wrap justify-content-between align-items-center gap-2 my-3">
+        <div><strong>@Model.TotalCount</strong> kayıt bulundu</div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Görünüm">
+                <a class="btn btn-outline-secondary @(q.View == "list" ? "active" : "")" href="@UrlWith("View", "list")">Liste</a>
+                <a class="btn btn-outline-secondary @(q.View == "map" ? "active" : "")" href="@UrlWith("View", "map")">Harita</a>
+                <a class="btn btn-outline-secondary @(q.View == "split" ? "active" : "")" href="@UrlWith("View", "split")">Bölünmüş</a>
+            </div>
+            <select class="form-select form-select-sm w-auto" aria-label="Sıralama" onchange="location.href=this.value">
+                @foreach (var o in ListingSearchResult.SortOptions)
+                {
+                    <option value="@UrlWith("Sort", o.Value)" selected="@(q.Sort == o.Value)">@o.Label</option>
+                }
+            </select>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#alertForm">Uyarı Oluştur</button>
+        </div>
+    </div>
+
+    <div class="collapse mb-3" id="alertForm">
+        <form method="post" action="/properties/alert" class="row g-2 align-items-end alert-box">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="QueryString" value="@currentUrl" />
+            <div class="col-md-6"><label class="form-label" for="alert-email">Bu aramaya uyan yeni ilanlar için e-posta</label><input id="alert-email" name="Email" type="email" required class="form-control" /></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Kaydet</button></div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="alert alert-info">Kriterlerinize uyan ilan bulunamadı. Filtreleri genişletmeyi deneyin.</div>
+    }
+    else
+    {
+        var showMap = q.View is "map" or "split";
+        var showList = q.View is "list" or "split";
+        <div class="row g-4">
+            @if (showMap)
+            {
+                <div class="@(q.View == "split" ? "col-lg-6" : "col-12")">
+                    <div id="map" class="listing-map" data-points='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Items.Where(l => l.Latitude != null).Select(l => new { id = l.Id, lat = l.Latitude, lng = l.Longitude, title = l.DisplayTitle, price = l.PriceLabel() })))'></div>
+                </div>
+            }
+            @if (showList)
+            {
+                <div class="@(q.View == "split" ? "col-lg-6" : "col-12")">
+                    <div class="row g-4">
+                        @foreach (var l in Model.Items)
+                        {
+                            <div class="@(q.View == "split" ? "col-md-6" : "col-sm-6 col-lg-4")"><partial name="_ListingCard" model="l" /></div>
+                        }
+                    </div>
+                    <partial name="_Pager" model="(q.Page, Model.TotalPages, (Func<int, string>)PageUrl)" />
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Head {
+    @if (Model.Query.View is "map" or "split")
+    {
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    }
+}
+@section Scripts {
+    @if (Model.Query.View is "map" or "split")
+    {
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    }
+}

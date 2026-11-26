@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "Gelen Kutusu";
+    string tab = ViewBag.Tab;
+    var messages = (List<ContactMessage>)ViewBag.Messages;
+    var apps = (List<CareerApplication>)ViewBag.Applications;
+    var alerts = (List<SearchAlert>)ViewBag.Alerts;
+}
+<h1 class="h3 mb-3">Gelen Kutusu</h1>
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link @(tab == "messages" ? "active" : "")" href="?tab=messages">Mesajlar (@messages.Count(m => !m.IsRead))</a></li>
+    <li class="nav-item"><a class="nav-link @(tab == "applications" ? "active" : "")" href="?tab=applications">Kariyer başvuruları (@apps.Count(a => !a.IsRead))</a></li>
+    <li class="nav-item"><a class="nav-link @(tab == "alerts" ? "active" : "")" href="?tab=alerts">Arama uyarıları (@alerts.Count)</a></li>
+</ul>
+@if (tab == "applications")
+{
+    <table class="table bg-white align-middle">
+        <thead><tr><th>Tarih</th><th>Ad Soyad</th><th>E-posta / Telefon</th><th>Lisans</th><th>Mesaj</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var a in apps)
+        {
+            <tr class="@(a.IsRead ? "" : "fw-bold")">
+                <td>@a.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td><td>@a.FirstName @a.LastName</td>
+                <td><a href="mailto:@a.Email">@a.Email</a><br />@a.Phone</td><td>@a.LicenseStatus.DisplayName()</td><td class="small">@a.Message</td>
+                <td class="text-nowrap">
+                    <form method="post" action="/admin/messages/markread/@a.Id?kind=app" class="d-inline">@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-secondary">@(a.IsRead ? "Okunmadı" : "Okundu")</button></form>
+                    <partial name="_DeleteButton" model="@($"/admin/messages/delete/{a.Id}?kind=app")" />
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else if (tab == "alerts")
+{
+    <table class="table bg-white align-middle">
+        <thead><tr><th>Tarih</th><th>E-posta</th><th>Arama</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var s in alerts)
+        {
+            <tr><td>@s.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td><td>@s.Email</td><td class="small"><a href="@s.QueryString" target="_blank">@s.QueryString</a></td>
+                <td><partial name="_DeleteButton" model="@($"/admin/messages/delete/{s.Id}?kind=alert")" /></td></tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <table class="table bg-white align-middle">
+        <thead><tr><th>Tarih</th><th>Tür</th><th>Ad</th><th>E-posta / Telefon</th><th>İlgili</th><th>Mesaj</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var m in messages)
+        {
+            <tr class="@(m.IsRead ? "" : "fw-bold")">
+                <td>@m.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td><td>@m.Type.DisplayName()</td><td>@m.Name</td>
+                <td><a href="mailto:@m.Email">@m.Email</a><br />@m.Phone</td>
+                <td class="small">
+                    @if (m.Listing is { } l) { <a href="/properties/@l.Id" target="_blank">İlan #@l.Id</a><br /> }
+                    @if (m.Agent is { } ag) { <span>@ag.FullName</span><br /> }
+                    @m.PropertyAddress
+                </td>
+                <td class="small">@m.Message</td>
+                <td class="text-nowrap">
+                    <form method="post" action="/admin/messages/markread/@m.Id?kind=msg" class="d-inline">@Html.AntiForgeryToken()<button class="btn btn-sm btn-outline-secondary">@(m.IsRead ? "Okunmadı" : "Okundu")</button></form>
+                    <partial name="_DeleteButton" model="@($"/admin/messages/delete/{m.Id}?kind=msg")" />
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

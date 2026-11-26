@@ -1,0 +1,60 @@
+@model Listing
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Yeni ilan" : $"İlan #{Model.Id}";
+    var bools = new[] {
+        nameof(Listing.IsExclusive), nameof(Listing.HasDoorman), nameof(Listing.HasElevator), nameof(Listing.HasLaundry), nameof(Listing.HasPool),
+        nameof(Listing.HasOutdoorSpace), nameof(Listing.HasParking), nameof(Listing.LaundryInUnit), nameof(Listing.NoFee),
+        nameof(Listing.PrivateOutdoorSpace), nameof(Listing.IsShortTerm), nameof(Listing.CentralAirConditioning), nameof(Listing.CatsOk), nameof(Listing.DogsOk) };
+}
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+<form method="post" action="/admin/listings/save" enctype="multipart/form-data" class="admin-form">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="row g-3">
+        <div class="col-md-6"><label asp-for="Address" class="form-label"></label><input asp-for="Address" class="form-control" /><span asp-validation-for="Address" class="text-danger small"></span></div>
+        <div class="col-md-2"><label asp-for="Unit" class="form-label"></label><input asp-for="Unit" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="NeighborhoodId" class="form-label"></label>
+            <select asp-for="NeighborhoodId" asp-items="(IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.Neighborhoods" class="form-select"><option value="">-- seçin --</option></select>
+            <span asp-validation-for="NeighborhoodId" class="text-danger small"></span></div>
+
+        <div class="col-md-3"><label asp-for="ListingType" class="form-label"></label><select asp-for="ListingType" asp-items="Html.GetEnumSelectList<ListingType>()" class="form-select"></select></div>
+        <div class="col-md-3"><label asp-for="Status" class="form-label"></label><select asp-for="Status" asp-items="Html.GetEnumSelectList<ListingStatus>()" class="form-select"></select></div>
+        <div class="col-md-3"><label asp-for="PropertyType" class="form-label"></label><select asp-for="PropertyType" asp-items="Html.GetEnumSelectList<PropertyType>()" class="form-select"></select></div>
+        <div class="col-md-3"><label asp-for="Source" class="form-label"></label><select asp-for="Source" asp-items="Html.GetEnumSelectList<ListingSource>()" class="form-select"></select></div>
+
+        <div class="col-md-3"><label asp-for="Price" class="form-label"></label><input asp-for="Price" class="form-control" /><span asp-validation-for="Price" class="text-danger small"></span></div>
+        <div class="col-md-2"><label asp-for="Bedrooms" class="form-label"></label><input asp-for="Bedrooms" class="form-control" min="0" /></div>
+        <div class="col-md-2"><label asp-for="Bathrooms" class="form-label"></label><input asp-for="Bathrooms" class="form-control" step="0.5" min="0" /></div>
+        <div class="col-md-2"><label asp-for="Families" class="form-label"></label><input asp-for="Families" class="form-control" min="0" /></div>
+        <div class="col-md-3"><label asp-for="SquareFeet" class="form-label"></label><input asp-for="SquareFeet" class="form-control" min="0" /></div>
+
+        <div class="col-md-3"><label asp-for="MonthlyExpense" class="form-label"></label><input asp-for="MonthlyExpense" class="form-control" /></div>
+        <div class="col-md-3"><label asp-for="AgentId" class="form-label"></label><select asp-for="AgentId" asp-items="(Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.Agents" class="form-select"><option value="">-- yok --</option></select></div>
+        <div class="col-md-6"><label asp-for="CourtesyOf" class="form-label"></label><input asp-for="CourtesyOf" class="form-control" /></div>
+
+        <div class="col-md-3"><label asp-for="ListedOn" class="form-label"></label><input asp-for="ListedOn" type="date" class="form-control" /></div>
+        <div class="col-md-3"><label asp-for="AvailableOn" class="form-label"></label><input asp-for="AvailableOn" type="date" class="form-control" /></div>
+        <div class="col-md-3"><label asp-for="OpenHouseAt" class="form-label"></label><input asp-for="OpenHouseAt" type="datetime-local" class="form-control" /></div>
+        <div class="col-md-3"><label asp-for="VirtualTourUrl" class="form-label"></label><input asp-for="VirtualTourUrl" class="form-control" /></div>
+        <div class="col-md-3"><label asp-for="Latitude" class="form-label">Enlem</label><input asp-for="Latitude" class="form-control" step="any" /></div>
+        <div class="col-md-3"><label asp-for="Longitude" class="form-label">Boylam</label><input asp-for="Longitude" class="form-control" step="any" /></div>
+
+        <div class="col-12">
+            <span class="form-label d-block">Özellikler</span>
+            <div class="feature-checks">
+                @foreach (var b in bools)
+                {
+                    <div class="form-check">@Html.CheckBox(b, (bool)typeof(Listing).GetProperty(b)!.GetValue(Model)!, new { @class = "form-check-input", id = "f-" + b })<label class="form-check-label" for="f-@b">@Html.DisplayName(b)</label></div>
+                }
+            </div>
+        </div>
+        <div class="col-12"><label asp-for="Description" class="form-label"></label><textarea asp-for="Description" rows="6" class="form-control"></textarea></div>
+        <div class="col-md-8"><label class="form-label" for="photoUrls">Fotoğraf URL'leri (her satıra bir tane, sıralı)</label>
+            <textarea id="photoUrls" name="photoUrls" rows="4" class="form-control">@string.Join("\n", Model.Photos.OrderBy(p => p.SortOrder).Select(p => p.Url))</textarea></div>
+        <div class="col-md-4"><label class="form-label" for="uploads">Fotoğraf yükle</label><input id="uploads" type="file" name="uploads" multiple accept="image/*" class="form-control" /></div>
+    </div>
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+        <a href="/admin/listings" class="btn btn-link">İptal</a>
+    </div>
+</form>

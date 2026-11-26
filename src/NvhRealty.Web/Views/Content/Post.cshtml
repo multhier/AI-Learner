@@ -1,0 +1,15 @@
+@model Post
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["Description"] = Model.Summary;
+    var basePath = Model.Category == PostCategory.News ? "/news" : "/blog";
+}
+<section class="page-header"><div class="container"><h1>@Model.Title</h1>
+    <p class="mb-0">@Model.PublishedOn.ToString("d MMMM yyyy", new System.Globalization.CultureInfo("tr-TR")) @(string.IsNullOrEmpty(Model.Author) ? "" : $"| {Model.Author}")</p></div></section>
+<div class="container py-4">
+    <article class="rich-text col-lg-9">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl)) { <img src="@Model.ImageUrl" alt="" class="img-fluid mb-3" /> }
+        @Html.Raw(Model.Body)
+    </article>
+    <a href="@basePath" class="btn btn-link px-0 mt-3">← Tüm yazılar</a>
+</div>

@@ -1,0 +1,26 @@
+@model Agent
+@{ ViewData["Title"] = Model.Id == 0 ? "Yeni danışman" : Model.FullName; }
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+<form method="post" action="/admin/agents/save" enctype="multipart/form-data" class="admin-form">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="PhotoUrl" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="row g-3">
+        <div class="col-md-4"><label asp-for="FirstName" class="form-label"></label><input asp-for="FirstName" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="LastName" class="form-label"></label><input asp-for="LastName" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="Phone" class="form-label"></label><input asp-for="Phone" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="Languages" class="form-label"></label><input asp-for="Languages" class="form-control" placeholder="English, Russian" /></div>
+        <div class="col-md-2"><label asp-for="SortOrder" class="form-label"></label><input asp-for="SortOrder" class="form-control" /></div>
+        <div class="col-md-10 d-flex gap-4 align-items-end">
+            <div class="form-check"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label"></label></div>
+            <div class="form-check"><input asp-for="IsManagement" class="form-check-input" /><label asp-for="IsManagement" class="form-check-label"></label></div>
+            <div class="form-check"><input asp-for="IsFeatured" class="form-check-input" /><label asp-for="IsFeatured" class="form-check-label"></label></div>
+        </div>
+        <div class="col-md-8"><label class="form-label" for="photo">Fotoğraf</label><input id="photo" type="file" name="photo" accept="image/*" class="form-control" />
+            @if (!string.IsNullOrEmpty(Model.PhotoUrl)) { <img src="@Model.PhotoUrl" alt="" height="80" class="mt-2" /> }</div>
+        <div class="col-12"><label asp-for="Bio" class="form-label"></label><textarea asp-for="Bio" rows="8" class="form-control"></textarea></div>
+    </div>
+    <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-primary">Kaydet</button><a href="/admin/agents" class="btn btn-link">İptal</a></div>
+</form>

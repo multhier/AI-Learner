@@ -1,0 +1,17 @@
+@model List<Post>
+@{ ViewData["Title"] = "Blog / Haberler"; }
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="h3 mb-0">Blog / Haberler</h1><a href="/admin/posts/create" class="btn btn-primary">+ Yeni yazı</a></div>
+<table class="table table-hover bg-white align-middle">
+    <thead><tr><th>Tarih</th><th>Başlık</th><th>Kategori</th><th>Yazar</th><th>Durum</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.PublishedOn.ToString("dd.MM.yyyy")</td>
+            <td><a href="/@(p.Category == PostCategory.News ? "news" : "blog")/@p.Slug" target="_blank">@p.Title</a></td>
+            <td>@p.Category.DisplayName()</td><td>@p.Author</td><td>@(p.IsPublished ? "Yayında" : "Taslak")</td>
+            <td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" href="/admin/posts/edit/@p.Id">Düzenle</a> <partial name="_DeleteButton" model="@($"/admin/posts/delete/{p.Id}")" /></td>
+        </tr>
+    }
+    </tbody>
+</table>

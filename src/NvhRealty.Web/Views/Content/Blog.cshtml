@@ -1,0 +1,44 @@
+@model BlogIndexViewModel
+@{
+    var isNews = Model.Category == PostCategory.News;
+    var basePath = isNews ? "/news" : "/blog";
+    ViewData["Title"] = isNews ? "Son Haberler" : "Faydalı İpuçları";
+    var tr = new System.Globalization.CultureInfo("tr-TR");
+    Func<int, string> pageUrl = i => basePath + "?page=" + i;
+}
+<section class="page-header"><div class="container"><h1>@ViewData["Title"]</h1></div></section>
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            @foreach (var p in Model.Posts.Items)
+            {
+                <article class="post-summary">
+                    <h2 class="h4"><a href="@basePath/@p.Slug">@p.Title</a></h2>
+                    <div class="post-meta">@p.PublishedOn.ToString("d MMMM yyyy", tr) @(string.IsNullOrEmpty(p.Author) ? "" : $"| {p.Author}")</div>
+                    <p>@(p.Summary ?? p.Body.Excerpt(300))</p>
+                    <a href="@basePath/@p.Slug" class="btn btn-sm btn-outline-primary">Devamını oku</a>
+                </article>
+            }
+            @if (Model.Posts.TotalCount == 0) { <p>Henüz yazı yok.</p> }
+            <partial name="_Pager" model="(Model.Posts.Page, Model.Posts.TotalPages, pageUrl)" />
+            <p class="text-muted small text-center">@Model.Posts.TotalCount kayıt bulundu</p>
+        </div>
+        <aside class="col-lg-4">
+            <div class="sidebar-box">
+                <h4>Arşiv</h4>
+                @foreach (var year in Model.Archive)
+                {
+                    <details open="@(year == Model.Archive.First())">
+                        <summary>@year.Key</summary>
+                        @foreach (var month in year.GroupBy(p => p.PublishedOn.Month))
+                        {
+                            <div class="ms-3 mt-1"><strong class="small">@tr.DateTimeFormat.GetMonthName(month.Key)</strong>
+                                <ul class="list-unstyled ms-2 mb-1">@foreach (var p in month) { <li class="small"><a href="@basePath/@p.Slug">@p.Title</a></li> }</ul>
+                            </div>
+                        }
+                    </details>
+                }
+            </div>
+        </aside>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+body { background: #f3f5f5; }
+.admin-nav { background: #0b5f59; }
+.admin-form { background: #fff; padding: 24px; border: 1px solid #e5e8e8; }
+.feature-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 16px; }
+.stat-tile { display: block; background: #fff; border: 1px solid #e5e8e8; padding: 18px; text-decoration: none; color: #2b2b2b; }
+.stat-tile:hover { border-color: #07988d; }
+.stat-value { display: block; font-size: 2rem; font-weight: 700; color: #07988d; }
+.stat-label { color: #6c757d; }
+.btn-primary { background: #07988d; border-color: #07988d; }
+.btn-primary:hover { background: #057a71; border-color: #057a71; }

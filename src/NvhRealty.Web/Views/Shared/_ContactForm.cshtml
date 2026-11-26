@@ -1,0 +1,34 @@
+@model ContactFormModel
+@{ var heading = ViewData["FormHeading"] as string ?? "Bize Yazın"; }
+<form method="post" action="/contact" class="contact-form">
+    @Html.AntiForgeryToken()
+    <h4 class="mb-3">@heading</h4>
+    <input type="hidden" asp-for="AgentId" />
+    <input type="hidden" asp-for="ListingId" />
+    <input type="hidden" asp-for="ReturnUrl" />
+    <div class="hp-field" aria-hidden="true"><label>Website <input asp-for="Website" tabindex="-1" autocomplete="off" /></label></div>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-2">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger small"></span>
+    </div>
+    <div class="row g-2">
+        <div class="col-sm-6 mb-2">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger small"></span>
+        </div>
+        <div class="col-sm-6 mb-2">
+            <label asp-for="Phone" class="form-label"></label>
+            <input asp-for="Phone" class="form-control" />
+            <span asp-validation-for="Phone" class="text-danger small"></span>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Message" class="form-label"></label>
+        <textarea asp-for="Message" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Message" class="text-danger small"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Gönder</button>
+</form>

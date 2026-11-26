@@ -1,0 +1,27 @@
+@model CareerFormModel
+@{ var page = ViewBag.Page as ContentPage; ViewData["Title"] = "Kariyer"; }
+<section class="page-header"><div class="container"><h1>Mülakat Başvurusu</h1></div></section>
+<div class="container py-4">
+    @if (page != null) { <div class="rich-text mb-4">@Html.Raw(page.Body)</div> }
+    <form method="post" class="sidebar-box col-lg-8">
+        @Html.AntiForgeryToken()
+        <div class="hp-field" aria-hidden="true"><label>Website <input asp-for="Website" tabindex="-1" autocomplete="off" /></label></div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="row g-3">
+            <div class="col-md-6"><label asp-for="FirstName" class="form-label"></label><input asp-for="FirstName" class="form-control" /><span asp-validation-for="FirstName" class="text-danger small"></span></div>
+            <div class="col-md-6"><label asp-for="LastName" class="form-label"></label><input asp-for="LastName" class="form-control" /><span asp-validation-for="LastName" class="text-danger small"></span></div>
+            <div class="col-md-6"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" /><span asp-validation-for="Email" class="text-danger small"></span></div>
+            <div class="col-md-6"><label asp-for="Phone" class="form-label"></label><input asp-for="Phone" class="form-control" /></div>
+            <div class="col-12">
+                <span class="form-label d-block">Lisans Durumu</span>
+                @foreach (LicenseStatus ls in Enum.GetValues<LicenseStatus>())
+                {
+                    <div class="form-check form-check-inline"><input class="form-check-input" type="radio" asp-for="LicenseStatus" value="@ls" id="ls-@ls" /><label class="form-check-label" for="ls-@ls">@ls.DisplayName()</label></div>
+                }
+            </div>
+            <div class="col-12"><label asp-for="Message" class="form-label"></label><textarea asp-for="Message" rows="4" class="form-control"></textarea></div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Başvur</button>
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

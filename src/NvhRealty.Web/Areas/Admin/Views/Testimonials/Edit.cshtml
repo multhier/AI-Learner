@@ -1,0 +1,17 @@
+@model Testimonial
+@{ ViewData["Title"] = Model.Id == 0 ? "Yeni yorum" : "Yorumu düzenle"; }
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+<form method="post" action="/admin/testimonials/save" class="admin-form">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="row g-3">
+        <div class="col-md-4"><label asp-for="ClientName" class="form-label"></label><input asp-for="ClientName" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="Headline" class="form-label"></label><input asp-for="Headline" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="Location" class="form-label"></label><input asp-for="Location" class="form-control" /></div>
+        <div class="col-md-4"><label asp-for="AgentId" class="form-label"></label><select asp-for="AgentId" asp-items="(Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.Agents" class="form-select"><option value="">-- genel --</option></select></div>
+        <div class="col-md-4"><label asp-for="Date" class="form-label"></label><input asp-for="Date" type="date" class="form-control" /></div>
+        <div class="col-md-4 d-flex align-items-end"><div class="form-check"><input asp-for="IsApproved" class="form-check-input" /><label asp-for="IsApproved" class="form-check-label"></label></div></div>
+        <div class="col-12"><label asp-for="Body" class="form-label"></label><textarea asp-for="Body" rows="6" class="form-control"></textarea></div>
+    </div>
+    <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-primary">Kaydet</button><a href="/admin/testimonials" class="btn btn-link">İptal</a></div>
+</form>

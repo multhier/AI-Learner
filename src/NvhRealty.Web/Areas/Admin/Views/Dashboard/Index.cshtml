@@ -1,0 +1,27 @@
+@model List<ContactMessage>
+@{ ViewData["Title"] = "Özet"; }
+<h1 class="h3 mb-4">Özet</h1>
+<div class="row g-3 mb-4">
+    @foreach (var (label, value, href) in new (string, object?, string)[] {
+        ("Aktif satılık", ViewBag.ActiveSales, "/admin/listings?type=Sale&status=Active"),
+        ("Aktif kiralık", ViewBag.ActiveRentals, "/admin/listings?type=Rental&status=Active"),
+        ("Danışman", ViewBag.Agents, "/admin/agents"),
+        ("Okunmamış mesaj", ViewBag.UnreadMessages, "/admin/messages"),
+        ("Yeni başvuru", ViewBag.UnreadApplications, "/admin/messages?tab=applications"),
+        ("Onay bekleyen yorum", ViewBag.PendingTestimonials, "/admin/testimonials"),
+        ("Arama uyarısı", ViewBag.Alerts, "/admin/messages?tab=alerts"),
+        ("Kayıtlı üye", ViewBag.Users, "#") })
+    {
+        <div class="col-6 col-md-3"><a class="stat-tile" href="@href"><span class="stat-value">@value</span><span class="stat-label">@label</span></a></div>
+    }
+</div>
+<h2 class="h5">Son mesajlar</h2>
+<table class="table table-sm bg-white">
+    <thead><tr><th>Tarih</th><th>Tür</th><th>Ad</th><th>E-posta</th><th>Mesaj</th></tr></thead>
+    <tbody>
+    @foreach (var m in Model)
+    {
+        <tr class="@(m.IsRead ? "" : "fw-bold")"><td>@m.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td><td>@m.Type.DisplayName()</td><td>@m.Name</td><td>@m.Email</td><td>@m.Message.Excerpt(80)</td></tr>
+    }
+    </tbody>
+</table>

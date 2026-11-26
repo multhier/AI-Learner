@@ -1,0 +1,10 @@
+@model ContentPageViewModel
+@{ ViewData["Title"] = Model.Page.Title; }
+<section class="page-header"><div class="container"><h1>@Model.Page.Title</h1></div></section>
+<div class="container py-4">
+    <div class="rich-text col-lg-9">@Html.Raw(Model.Page.Body)</div>
+    @if (!string.IsNullOrEmpty(Model.Page.VideoUrl))
+    {
+        <p class="mt-3"><a href="@Model.Page.VideoUrl" target="_blank" rel="noopener" class="btn btn-outline-primary">Tanıtım videosunu izle</a></p>
+    }
+</div>

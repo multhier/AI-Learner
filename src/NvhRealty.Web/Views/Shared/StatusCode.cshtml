@@ -1,0 +1,9 @@
+@{
+    var code = (int)(ViewBag.Code ?? 500);
+    ViewData["Title"] = code == 404 ? "Sayfa bulunamadı" : "Hata";
+}
+<section class="page-header"><div class="container"><h1>@ViewData["Title"]</h1></div></section>
+<div class="container py-5 text-center">
+    <p class="lead">@(code == 404 ? "Aradığınız sayfa taşınmış veya kaldırılmış olabilir." : "Beklenmeyen bir hata oluştu.")</p>
+    <a href="/" class="btn btn-primary">Anasayfaya dön</a>
+</div>

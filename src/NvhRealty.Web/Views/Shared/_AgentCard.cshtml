@@ -1,0 +1,8 @@
+@model Agent
+<a href="/agents/@Model.Id" class="card agent-card h-100 text-reset text-decoration-none">
+    <img src="@(Model.PhotoUrl ?? "/img/agent-placeholder.svg")" class="card-img-top" alt="@Model.FullName" />
+    <div class="card-body text-center">
+        <h3 class="h6 mb-1">@Model.FullName</h3>
+        <div class="small text-muted">@Model.Title</div>
+    </div>
+</a>

@@ -1,0 +1,43 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string c) => string.Equals(controller, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | Yönetim Paneli</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark admin-nav">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/admin">Yönetim Paneli</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav" aria-controls="adminNav" aria-expanded="false" aria-label="Menü"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link @Active("Listings")" href="/admin/listings">İlanlar</a></li>
+                <li class="nav-item"><a class="nav-link @Active("Agents")" href="/admin/agents">Danışmanlar</a></li>
+                <li class="nav-item"><a class="nav-link @Active("Posts")" href="/admin/posts">Blog / Haberler</a></li>
+                <li class="nav-item"><a class="nav-link @Active("Testimonials")" href="/admin/testimonials">Yorumlar</a></li>
+                <li class="nav-item"><a class="nav-link @Active("Pages")" href="/admin/pages">Sayfalar</a></li>
+                <li class="nav-item"><a class="nav-link @Active("Messages")" href="/admin/messages">Gelen Kutusu</a></li>
+                <li class="nav-item"><a class="nav-link @Active("Settings")" href="/admin/settings">Ayarlar</a></li>
+            </ul>
+            <a class="btn btn-sm btn-outline-light" href="/" target="_blank">Siteyi görüntüle</a>
+        </div>
+    </div>
+</nav>
+<main class="container-fluid py-4">
+    @if (TempData["Success"] is string ok) { <div class="alert alert-success">@ok</div> }
+    @RenderBody()
+</main>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

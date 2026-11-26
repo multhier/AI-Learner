@@ -1,0 +1,22 @@
+@model OwnerFormModel
+@{ var page = ViewBag.Page as ContentPage; ViewData["Title"] = page?.Title ?? "Mülkünü Listele"; }
+<section class="page-header"><div class="container"><h1>@ViewData["Title"]</h1></div></section>
+<div class="container py-4">
+    @if (page != null) { <div class="rich-text mb-4">@Html.Raw(page.Body)</div> }
+    <form method="post" class="sidebar-box col-lg-8">
+        @Html.AntiForgeryToken()
+        <div class="hp-field" aria-hidden="true"><label>Website <input asp-for="Website" tabindex="-1" autocomplete="off" /></label></div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="row g-3">
+            <div class="col-md-6"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger small"></span></div>
+            <div class="col-md-6"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" /><span asp-validation-for="Email" class="text-danger small"></span></div>
+            <div class="col-md-6"><label asp-for="Phone" class="form-label"></label><input asp-for="Phone" class="form-control" /></div>
+            <div class="col-md-6"><label asp-for="ListingType" class="form-label"></label>
+                <select asp-for="ListingType" class="form-select"><option value="Sale">Satmak istiyorum</option><option value="Rental">Kiraya vermek istiyorum</option></select></div>
+            <div class="col-12"><label asp-for="PropertyAddress" class="form-label"></label><input asp-for="PropertyAddress" class="form-control" /><span asp-validation-for="PropertyAddress" class="text-danger small"></span></div>
+            <div class="col-12"><label asp-for="Message" class="form-label"></label><textarea asp-for="Message" rows="4" class="form-control"></textarea></div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Gönder</button>
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

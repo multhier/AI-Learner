@@ -1,0 +1,21 @@
+@model ContactFormModel
+@{ ViewData["Title"] = "İletişim"; var s = await SiteSettings.GetAllAsync(); }
+<section class="page-header"><div class="container"><h1>Bize Ulaşın</h1><p class="mb-0">Bize bir satır yazmaktan çekinmeyin</p></div></section>
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-7 sidebar-box">
+            @{ ViewData["FormHeading"] = "Mesaj Gönderin"; }
+            <partial name="_ContactForm" model="Model" view-data="ViewData" />
+        </div>
+        <div class="col-lg-5">
+            <div class="sidebar-box">
+                <h4>@s["CompanyName"]</h4>
+                <p class="mb-1">@s["Address"]</p>
+                <p class="mb-1">@s["City"]</p>
+                <p class="mb-1"><a href="tel:@s["Phone"]">@s["Phone"]</a></p>
+                <p class="mb-0"><a href="mailto:@s["Email"]">@s["Email"]</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

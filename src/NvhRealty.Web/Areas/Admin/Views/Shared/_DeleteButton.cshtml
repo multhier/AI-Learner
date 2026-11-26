@@ -1,0 +1,5 @@
+@model string
+<form method="post" action="@Model" class="d-inline" onsubmit="return confirm('Silmek istediğinize emin misiniz?');">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+</form>

@@ -1,0 +1,21 @@
+@model IReadOnlyDictionary<string, string>
+@{
+    ViewData["Title"] = "Site Ayarları";
+    var labels = new Dictionary<string, string> {
+        ["CompanyName"] = "Şirket adı", ["Slogan"] = "Anasayfa sloganı", ["Address"] = "Adres", ["City"] = "Şehir / Posta kodu",
+        ["Phone"] = "Telefon", ["Email"] = "E-posta", ["Facebook"] = "Facebook URL", ["Twitter"] = "X / Twitter URL", ["LinkedIn"] = "LinkedIn URL",
+        ["HomeListingsText"] = "Anasayfa 'İlanlarımız' metni", ["HomeToolsText"] = "Anasayfa 'Araçlarımız' metni" };
+}
+<h1 class="h3 mb-3">Site Ayarları</h1>
+<form method="post" class="admin-form">
+    <div class="row g-3">
+        @foreach (var key in NvhRealty.Web.Services.SiteSettingsService.Defaults.Keys)
+        {
+            <div class="col-md-6">
+                <label class="form-label" for="s-@key">@(labels.GetValueOrDefault(key, key))</label>
+                <input id="s-@key" name="values[@key]" value="@Model[key]" class="form-control" />
+            </div>
+        }
+    </div>
+    <button type="submit" class="btn btn-primary mt-4">Kaydet</button>
+</form>

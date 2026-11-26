@@ -1,0 +1,32 @@
+@model AgentIndexViewModel
+@{ ViewData["Title"] = "Danışmanlarımız"; }
+<section class="page-header"><div class="container"><h1>Danışmanlarımız</h1></div></section>
+<div class="container py-4">
+    <div class="alpha-nav mb-3" aria-label="Alfabetik gezinme">
+        <span class="me-2">Alfabetik:</span>
+        <a href="/agents" class="@(string.IsNullOrEmpty(Model.Letter) ? "active" : "")">Tümü</a>
+        @for (var c = 'A'; c <= 'Z'; c++)
+        {
+            <a href="/agents?letter=@c" class="@(Model.Letter == c.ToString() ? "active" : "")">@c</a>
+        }
+    </div>
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-5"><input name="name" value="@Model.Name" class="form-control" placeholder="Danışman adı" aria-label="Danışman adı" /></div>
+        <div class="col-md-4">
+            <select name="language" class="form-select" aria-label="Dil">
+                <option value="">Tüm diller</option>
+                @foreach (var lang in Model.Languages) { <option value="@lang" selected="@(Model.Language == lang)">@lang</option> }
+            </select>
+        </div>
+        <div class="col-md-3"><button class="btn btn-primary w-100" type="submit">Filtrele</button></div>
+    </form>
+
+    @if (Model.Management.Count > 0)
+    {
+        <h2 class="section-title">Yönetim</h2>
+        <div class="row g-4 mb-4">@foreach (var a in Model.Management) { <div class="col-sm-6 col-lg-3"><partial name="_AgentCard" model="a" /></div> }</div>
+    }
+    <h2 class="section-title">Danışmanlar</h2>
+    @if (Model.Agents.Count == 0) { <p>Kriterlere uyan danışman bulunamadı.</p> }
+    <div class="row g-4">@foreach (var a in Model.Agents) { <div class="col-sm-6 col-lg-3"><partial name="_AgentCard" model="a" /></div> }</div>
+</div>
