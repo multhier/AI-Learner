@@ -5,13 +5,16 @@
 <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-9">
         <h1 class="h2 section-title mb-2">Beni oku</h1>
+        <p class="text-white-50 mb-2">
+            Bu sayfa, Kıvılcım adlı siteyi nasıl yaptığımızı anlatıyor. Sanki sana bir hikâye anlatıyormuş gibi yazdım.
+        </p>
         <p class="text-white-50 mb-4">
-            Bu sayfa Kıvılcım'ın nasıl yapıldığını anlatır. Her başlığa tıklayarak açıp kapatabilirsin.
+            Her başlığa tıklarsan içi açılır, tekrar tıklarsan kapanır.
         </p>
 
         <div class="d-flex gap-2 mb-3">
-            <button type="button" class="btn btn-sm btn-outline-light" id="okuAc">Tümünü aç</button>
-            <button type="button" class="btn btn-sm btn-outline-light" id="okuKapat">Tümünü kapat</button>
+            <button type="button" class="btn btn-sm btn-outline-light" id="okuAc">Hepsini aç</button>
+            <button type="button" class="btn btn-sm btn-outline-light" id="okuKapat">Hepsini kapat</button>
         </div>
 
         <div class="accordion okubeni-list" id="okubeniListesi">
@@ -19,14 +22,14 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#s1" aria-expanded="true" aria-controls="s1">
-                        1. Neden başladık?
+                        1. Bu site ne işe yarıyor?
                     </button>
                 </h2>
                 <div id="s1" class="accordion-collapse collapse show">
                     <div class="accordion-body">
-                        <p><strong>Amaç:</strong> Tumblr benzeri bir blog ve paylaşım sitesi yapmak. Kendi adımız ve tasarımımızla, sıfırdan.</p>
-                        <p><strong>Neden Tumblr'ı inceledik?</strong> Önce sitenin nasıl çalıştığını anlamak istedik. REA adlı tersine mühendislik aracıyla sayfanın kodunu <em>çalıştırmadan, okuyarak</em> inceledik. Gönderilerin sayfa sayfa yüklenmesi (<code>max_post_id</code>) ve etiket gizleme gibi fikirleri aldık; adı, logosu ve tasarımı kopyalamadık.</p>
-                        <p><strong>Neden ASP.NET Core ve SQL Server?</strong> Kurumsal projelerde yaygın, güvenli ve Visual Studio ile rahat çalışan bir yığın olduğu için.</p>
+                        <p>Kıvılcım bir <strong>blog ve paylaşım sitesi</strong>. Tıpkı Tumblr gibi: herkes kendi sayfasını açabilir, yazı, resim, video ya da bağlantı paylaşabilir.</p>
+                        <p>Arkadaşını takip edebilir, gönderilerini beğenebilir, yanıt yazabilir ve ona mesaj atabilirsin.</p>
+                        <p class="mb-0"><strong>Önemli:</strong> Tumblr'ın adını, logosunu ya da tasarımını kopyalamadık. Her şeyi kendi adımızla, sıfırdan yaptık.</p>
                     </div>
                 </div>
             </div>
@@ -34,25 +37,14 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s2" aria-expanded="false" aria-controls="s2">
-                        2. Mimari: soğan (katmanlı) yapı
+                        2. Neden Tumblr'a baktık?
                     </button>
                 </h2>
                 <div id="s2" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        <p>Kod, dıştaki sunumdan içteki temel kurallara doğru <strong>beş projeye</strong> ayrıldı. Her katman yalnızca kendisinin içindeki katmanlara bağlıdır:</p>
-                        <div class="table-responsive">
-                            <table class="table table-dark table-bordered align-middle mb-0">
-                                <thead><tr><th>Proje</th><th>Katman</th><th>Neler var?</th><th>Bağımlı olduğu</th></tr></thead>
-                                <tbody>
-                                    <tr><td>Core</td><td>Ortak soyutlamalar</td><td>Repository, Unit of Work, dosya ve canlı bağlantı arayüzleri, sonuç tipi</td><td>Hiçbir proje</td></tr>
-                                    <tr><td>Model</td><td>Domain</td><td>Tablolar (Post, Like, Follow, Message...)</td><td>Core</td></tr>
-                                    <tr><td>Bll</td><td>Uygulama</td><td>Servisler, DTO'lar, kurallar (en fazla 30 resim, blog adı, mesaj sınırı)</td><td>Core, Model</td></tr>
-                                    <tr><td>Dal</td><td>Altyapı</td><td>EF Core, repository ve Unit of Work gerçeklemesi, Identity, dosya kaydı, e-posta</td><td>Core, Model, Bll</td></tr>
-                                    <tr><td>Web</td><td>Sunum</td><td>MVC sayfaları, SignalR, sağ alttaki konuşma paneli</td><td>Bll; Dal yalnızca kayıt ve Identity için</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <p class="mt-3 mb-0"><strong>Bu şu demektir:</strong> Bir kural (örneğin "en fazla 30 resim") yalnızca Bll'de yazılır. Hem gönderi oluşturma hem düzenleme ona uyar; sayfa değişse de kural değişmez.</p>
+                        <p>Önce "bu site nasıl çalışıyor?" diye merak ettik. Bunu bulmak için <strong>REA</strong> adlı bir araç kullandık.</p>
+                        <p><strong>REA ne demek?</strong> Bir sitenin kodunu okuyup nasıl yapıldığını anlamaya yarayan bir araç. Tıpkı bir oyuncağı açıp içine bakmak gibi, ama sitenin çalışmasını bozmadan.</p>
+                        <p class="mb-0">Bulduğumuz fikirlerden bazıları: gönderileri sayfa sayfa yüklemek ve istemediğin etiketleri gizlemek.</p>
                     </div>
                 </div>
             </div>
@@ -60,17 +52,17 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s3" aria-expanded="false" aria-controls="s3">
-                        3. SOLID ilkeleri nerede?
+                        3. Hangi araçlarla yaptık?
                     </button>
                 </h2>
                 <div id="s3" class="accordion-collapse collapse">
                     <div class="accordion-body">
                         <ul>
-                            <li><strong>S (Tek sorumluluk):</strong> Her servis tek bir iş yapar. Örneğin <code>MessageService</code> yalnızca mesajlarla ilgilenir, bildirimle değil.</li>
-                            <li><strong>O (Açık/kapalı):</strong> Yeni bir dosya saklama yöntemi (örneğin bulut) eklemek için <code>IFileStorage</code>'ı yeni bir sınıfla gerçekleştirmek yeterli; servisler değişmez.</li>
-                            <li><strong>L (Liskov):</strong> <code>IRepository&lt;T&gt;</code> ve <code>IUnitOfWork</code> sözleşmesi, gerçekleyen sınıfın davranışını bozmadan değiştirilebilir.</li>
-                            <li><strong>I (Arayüz ayrımı):</strong> Küçük, odaklı arayüzler: <code>IPostService</code> (yazma), <code>IPostQueryService</code> (okuma), <code>IInboxService</code> (sayaçlar).</li>
-                            <li><strong>D (Bağımlılığın tersine çevrilmesi):</strong> Bll, EF Core'u <em>bilmez</em>; yalnızca <code>IQueryExecutor</code> ve <code>IUnitOfWork</code> arayüzlerini kullanır. Canlı bağlantıyı (SignalR) da <code>IRealtimeNotifier</code> üzerinden çağırır.</li>
+                            <li><strong>ASP.NET Core 8 MVC:</strong> Web sitesi yapmamızı sağlayan bir kütüphane. <em>MVC</em> ise sayfayı üç parçaya bölmek demek: veri (Model), görünüm (View) ve sayfayı yöneten kişi (Controller).</li>
+                            <li><strong>SQL Server:</strong> Bilgilerin saklandığı büyük bir defter. Kullanıcılar, gönderiler ve mesajlar burada tutulur.</li>
+                            <li><strong>Entity Framework Core (EF Core):</strong> Kodla defter arasında tercümanlık yapan araç. Biz "şunu getir" dediğimizde defteri bizim yerimize okur.</li>
+                            <li><strong>Bootstrap:</strong> Sayfanın güzel görünmesini sağlayan hazır bir stil paketi. Telefonda da düzgün görünmesini sağlar.</li>
+                            <li><strong>SignalR:</strong> Sayfayı yenilemeden anında haber vermeyi sağlayan araç. Birisi sana mesaj atınca balon hemen çıkar.</li>
                         </ul>
                     </div>
                 </div>
@@ -79,13 +71,26 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s4" aria-expanded="false" aria-controls="s4">
-                        4. Unit of Work ve veri erişimi
+                        4. Kodu neden parçalara böldük? (Katmanlar)
                     </button>
                 </h2>
                 <div id="s4" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        <p><strong>Unit of Work</strong>, bir işlem sırasında yapılan tüm değişiklikleri tek bir <code>SaveChangesAsync()</code> çağrısında kaydeder. Gönderi silinirken bildirimler, reblog bağları ve veritabanı kaydı birlikte değişir; biri başarısız olursa hiçbiri yarım kalmaz.</p>
-                        <p>Repository'ler (<code>IRepository&lt;T&gt;</code>) aynı bağlamı paylaşır. Sorgular <code>IQueryable</code> olarak kurulur, asenkron çalıştırma <code>IQueryExecutor</code> ile yapılır.</p>
+                        <p>Kodu tek bir kutuda tutsaydık, bir şeyi değiştirince her şey bozulabilirdi. Bu yüzden soğan gibi <strong>katmanlara</strong> ayırdık. Ortada en önemli kurallar, dışta sayfalar var.</p>
+                        <p><strong>Katman ne demek?</strong> Bir soğanın kabukları gibi, her biri bir öncekini sarar.</p>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-bordered align-middle mb-3">
+                                <thead><tr><th>Kutu</th><th>Ne yapar?</th><th>Kimi kullanır?</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Core</td><td>En temel şablonlar. Kendisi hiçbir şeye ihtiyaç duymaz.</td><td>Hiçbiri</td></tr>
+                                    <tr><td>Model</td><td>Tabloların şekli: kullanıcı, gönderi, mesaj.</td><td>Core</td></tr>
+                                    <tr><td>Bll</td><td>Kurallar ve işler: "en fazla 30 resim", "mesaj boş olamaz".</td><td>Core, Model</td></tr>
+                                    <tr><td>Dal</td><td>Veritabanıyla gerçekten konuşan kısım.</td><td>Core, Model, Bll</td></tr>
+                                    <tr><td>Web</td><td>Sayfaların kendisi. Kullanıcının gördüğü şey.</td><td>Bll (ve Dal, sadece giriş için)</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="mb-0">Kural değişirse sadece Bll'yi değiştiririz. Sayfa ne olursa olsun kural aynı kalır.</p>
                     </div>
                 </div>
             </div>
@@ -93,16 +98,18 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s5" aria-expanded="false" aria-controls="s5">
-                        5. Canlı özellikler (SignalR)
+                        5. SOLID ne demek? (Beş kural)
                     </button>
                 </h2>
                 <div id="s5" class="accordion-collapse collapse">
                     <div class="accordion-body">
+                        <p><strong>SOLID</strong> programcılar için beş iyi alışkanlık. Her harfi bir kural:</p>
                         <ul>
-                            <li><strong>Bildirimler:</strong> Beğeni, reblog, yanıt ve takipte sayfa yenilenmeden bildirim balonu ve sayaç.</li>
-                            <li><strong>Konuşma paneli:</strong> Sağ alttaki panelde mesajlar anında gelir; panel kapalıysa sayaç artar.</li>
-                            <li><strong>Canlı yanıtlar:</strong> Bir gönderiyi açık tutan herkes, yeni yanıtı sayfayı yenilemeden görür.</li>
-                            <li><strong>Düzenleme:</strong> Gönderi düzenlendiğinde, o gönderiyi açık tutanlara canlı bildirim gider.</li>
+                            <li><strong>S: Tek iş.</strong> Her parça tek bir iş yapar. Mesaj parçası sadece mesajla ilgilenir, bildirimle değil.</li>
+                            <li><strong>O: Genişlemeye açık, bozulmaya kapalı.</strong> Yeni bir özellik eklemek kolay olmalı, eskisini bozmadan.</li>
+                            <li><strong>L: Yerine geçebilirlik.</strong> Bir parça yerine benzeri konunca her şey yine çalışmalı.</li>
+                            <li><strong>I: Küçük sözleşmeler.</strong> Her parça sadece ihtiyacı olan kadarını bilir.</li>
+                            <li><strong>D: Ustaya değil, söze bağlılık.</strong> Bll, veritabanı aracının adını bilmez; sadece "veri getir" sözünü bilir.</li>
                         </ul>
                     </div>
                 </div>
@@ -111,15 +118,23 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s6" aria-expanded="false" aria-controls="s6">
-                        6. Gönderi, galeri ve düzenleme
+                        6. Terimler kısaca
                     </button>
                 </h2>
                 <div id="s6" class="accordion-collapse collapse">
                     <div class="accordion-body">
                         <ul>
-                            <li><strong>+ Gönderi:</strong> Metin, fotoğraf, video, alıntı veya bağlantı seçilir.</li>
-                            <li><strong>Fotoğraf:</strong> Aynı anda birden çok resim seçilebilir ya da internet adresi eklenebilir; en fazla 30.</li>
-                            <li><strong>Düzenleme:</strong> Kendi gönderinin başlığını, metnini, bağlantısını ve etiketlerini değiştirebilirsin. Başkasının gönderisini düzenleyemezsin.</li>
+                            <li><strong>Interface (arayüz):</strong> Bir şeyin "ne yapabileceğini" söyleyen liste. Nasıl yapıldığı önemli değil.</li>
+                            <li><strong>Repository:</strong> Bir tablo için "ekle, bul, sil" işlerini yapan görevli.</li>
+                            <li><strong>Unit of Work:</strong> Birden çok değişikliği tek paket halinde kaydeden kutu. Ya hepsi kaydolur, ya hiçbiri.</li>
+                            <li><strong>Servis:</strong> Bir işi yapan parça. Örneğin "gönderi oluştur" işini PostService yapar.</li>
+                            <li><strong>DTO:</strong> Parçalar arasında taşınan kağıt paket. Sadece gerekli bilgiyi içerir.</li>
+                            <li><strong>Controller:</strong> Sen bir adrese girince isteği alan ve sayfayı hazırlatan görevli.</li>
+                            <li><strong>View:</strong> Ekranda gördüğün sayfa.</li>
+                            <li><strong>Migration:</strong> Veritabanına "şu tabloyu ekle, şu sütunu değiştir" diyen adım adım tarif.</li>
+                            <li><strong>Seed:</strong> Boş bir veritabanına başlangıç verisi koymak. Örnek kullanıcılar gibi.</li>
+                            <li><strong>Identity:</strong> Kayıt olma, giriş yapma ve şifre işlerini hazır yapan sistem.</li>
+                            <li><strong>Token (CSRF koruması):</strong> Formun gerçekten senden geldiğini kanıtlayan gizli bir kâğıt parçası.</li>
                         </ul>
                     </div>
                 </div>
@@ -128,18 +143,13 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s7" aria-expanded="false" aria-controls="s7">
-                        7. Veritabanı Visual Studio'da nasıl oluşuyor?
+                        7. Unit of Work ve veri nasıl kaydediliyor?
                     </button>
                 </h2>
                 <div id="s7" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        <ol>
-                            <li>Visual Studio'da <code>Kivilcim.sln</code> dosyasını aç.</li>
-                            <li>Başlangıç projesi <strong>Kivilcim</strong> (Web) olsun.</li>
-                            <li><strong>F5</strong>'e bas.</li>
-                        </ol>
-                        <p>Uygulama açılırken <strong>veritabanı yoksa otomatik oluşturulur</strong> ve tüm migration'lar uygulanır. Geliştirme ortamında örnek kullanıcılar ve gönderiler de eklenir.</p>
-                        <p class="mb-0">Varsayılan veritabanı LocalDB'dir. Farklı bir SQL Server kullanıyorsan <code>appsettings.json</code> içindeki bağlantı satırını değiştir.</p>
+                        <p>Bir gönderiyi silerken birkaç şey değişir: gönderi silinir, bildirimler silinir, reblog bağları kopar.</p>
+                        <p>Bunları tek tek kaydetseydik, ortada kalabilirdi. <strong>Unit of Work</strong> hepsini biriktirir ve tek seferde kaydeder. Bir hata olursa hiçbiri kaydolmaz; yarım iş kalmaz.</p>
                     </div>
                 </div>
             </div>
@@ -147,13 +157,17 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s8" aria-expanded="false" aria-controls="s8">
-                        8. Testler ve kalite
+                        8. Anlık özellikler (SignalR)
                     </button>
                 </h2>
                 <div id="s8" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        <p>Gerçek bir tarayıcıyla (Playwright), gerçek SQL Server 2022 üzerinde <strong>tüm kullanıcı senaryoları</strong> test edilir: giriş, gönderi, galeri, düzenleme, mesaj, bildirim, şifre sıfırlama ve mobil görünüm.</p>
-                        <p class="mb-0">Ayrıca GitHub Actions her yüklemede projeyi derler, SQL Server ile başlatır ve sayfaları kontrol eder.</p>
+                        <ul>
+                            <li><strong>Bildirim:</strong> Birisi gönderini beğenince sayfa yenilenmeden balon çıkar.</li>
+                            <li><strong>Konuşma paneli:</strong> Sağ alttaki panelde mesajlar anında gelir.</li>
+                            <li><strong>Canlı yanıt:</strong> Bir gönderiyi açık tutan herkes yeni yanıtı hemen görür.</li>
+                            <li><strong>Düzenleme:</strong> Gönderi değişince açık sayfalar kendini yeniler.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -161,18 +175,72 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s9" aria-expanded="false" aria-controls="s9">
-                        9. Yapılanlar ve kalanlar
+                        9. Docker ne işe yarıyor?
                     </button>
                 </h2>
                 <div id="s9" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        <p><strong>Yapılanlar:</strong> Blog, gönderi türleri, akış, keşfet, etiket, arama, beğeni, reblog, yanıt, takip, bildirim, mesaj, düzenleme, galeri, Türkçe giriş ve şifre sıfırlama.</p>
-                        <p class="mb-0"><strong>Kalanlar:</strong> Canlı sunucuya yayın (bir barındırma hesabı gerekiyor) ve gerçek e-posta gönderimi (SMTP ayarı gerekiyor).</p>
+                        <p><strong>Docker ne demek?</strong> Sitemizi ve veritabanını, çalışması için gereken her şeyle birlikte tek bir kutuya koyan araç.</p>
+                        <p>Kutuyu bir bilgisayardan diğerine taşısan bile aynı şekilde çalışır. "Benim bilgisayarımda çalışıyordu" derdi biter.</p>
+                        <p class="mb-0">Komutu şu: <code>docker compose up -d --build</code></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s10" aria-expanded="false" aria-controls="s10">
+                        10. Veritabanı F5'e basınca nasıl oluşuyor?
+                    </button>
+                </h2>
+                <div id="s10" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>Visual Studio'da <code>Kivilcim.sln</code> dosyasını aç.</li>
+                            <li>Başlangıç projesi <strong>Kivilcim</strong> olsun.</li>
+                            <li><strong>F5</strong>'e bas.</li>
+                        </ol>
+                        <p><strong>F5 ne demek?</strong> Programı çalıştır demek. Veritabanı yoksa, program kendi kendine oluşturur ve örnek kullanıcıları ekler.</p>
+                        <p class="mb-0">Varsayılan defter LocalDB. Başka bir SQL Server kullanacaksan <code>appsettings.json</code> içindeki satırı değiştir.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s11" aria-expanded="false" aria-controls="s11">
+                        11. Testler ve CI ne demek?
+                    </button>
+                </h2>
+                <div id="s11" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <ul>
+                            <li><strong>Test:</strong> Robot gibi bir tarayıcı açıp siteyi kullanıyormuş gibi davranmak. Her şey beklendiği gibi mi diye bakar.</li>
+                            <li><strong>Playwright:</strong> Bu robotu yapan araç.</li>
+                            <li><strong>CI (sürekli entegrasyon):</strong> Kodu GitHub'a her yüklediğimizde, GitHub'ın bilgisayarı projeyi kendiliğinden derler ve test eder.</li>
+                        </ul>
+                        <p class="mb-0">Şu anda 117 kontrolün hepsi geçiyor.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#s12" aria-expanded="false" aria-controls="s12">
+                        12. Ne yaptık, ne kaldı?
+                    </button>
+                </h2>
+                <div id="s12" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <p><strong>Yaptıklarımız:</strong> Blog, gönderi, resim, video, akış, arama, beğeni, yanıt, takip, mesaj, bildirim, düzenleme, Türkçe giriş ve şifre sıfırlama.</p>
+                        <p class="mb-0"><strong>Kalanlar:</strong> Siteyi internete açmak (bir barındırma hesabı gerekiyor) ve gerçek e-posta göndermek (bir e-posta ayarı gerekiyor).</p>
                     </div>
                 </div>
             </div>
 
         </div>
+
+        <hr class="okubeni-son-cizgi">
     </div>
 </div>
 

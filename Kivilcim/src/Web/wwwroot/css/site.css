@@ -374,3 +374,6 @@ span[data-valmsg-for] { display: block; min-height: 1.35em; }
 .okubeni-list .accordion-body { line-height: 1.6; color: var(--text); }
 .okubeni-list code { color: #b02a37; }
 .footer-link { color: #ffb59c; }
+
+/* Beni oku sayfasının en altındaki kalın çizgi */
+.okubeni-son-cizgi { border: 0; border-top: 8px solid #ff6a3d; opacity: 1; margin: 2.5rem 0 1rem; border-radius: 4px; }
