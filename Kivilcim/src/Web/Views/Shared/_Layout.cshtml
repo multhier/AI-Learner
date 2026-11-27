@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] is string t ? $"{t} · Kıvılcım" : "Kıvılcım")</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body data-signed-in="@(User.Identity?.IsAuthenticated == true ? "true" : "false")">
+    <header class="site-header sticky-top">
+        <nav class="navbar navbar-expand-md navbar-dark">
+            <div class="container">
+                <a class="navbar-brand brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="brand-spark">✦</span> Kıvılcım
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Menüyü aç">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <form class="d-flex my-2 my-md-0 mx-md-3 flex-grow-1 search-form" method="get" action="/search" role="search">
+                        <input class="form-control" type="search" name="q" placeholder="Kıvılcım'da ara" aria-label="Ara"
+                               value="@Context.Request.Query["q"]" />
+                    </form>
+                    <ul class="navbar-nav align-items-md-center gap-md-1">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Akış</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/explore">Keşfet</a></li>
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-4" role="main">
+        @if (TempData["Message"] is string message)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @message
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+            </div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @error
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer py-4">
+        <div class="container small">
+            &copy; @DateTime.Now.Year Kıvılcım · ASP.NET Core MVC ile yapıldı · <a href="/okubeni" class="footer-link">Beni oku</a>
+        </div>
+    </footer>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <partial name="_ComposeModal" />
+        <partial name="_ChatWidget" />
+    }
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastArea" aria-live="polite"></div>
+
+    @* JavaScript isteklerinin kullandığı CSRF token'ı *@
+    <form id="antiforgery" class="d-none">@Html.AntiForgeryToken()</form>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    }
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

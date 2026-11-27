@@ -109,17 +109,25 @@ gerçek bir SQL Server 2022 konteyneriyle başlatıp ana sayfaları kontrol eder
 
 Tabloların açıklaması: [docs/VERITABANI.md](docs/VERITABANI.md)
 
-## Proje yapısı
+## Proje yapısı (soğan mimarisi)
+
+| Proje | Katman | Bağımlı olduğu |
+|---|---|---|
+| `src/Core` | Ortak soyutlamalar (IRepository, IUnitOfWork, IQueryExecutor, IFileStorage, IRealtimeNotifier, Result) | hiçbiri |
+| `src/Model` | Domain: tablolar (ApplicationUser, Post, Like, Message...) | Core |
+| `src/Bll` | Uygulama: servis arayüzleri ve gerçeklemeleri, DTO'lar, kurallar | Core, Model |
+| `src/Dal` | Altyapı: EF Core, repository ve Unit of Work, Identity, dosya kaydı, e-posta, migration'lar | Core, Model, Bll |
+| `src/Web` | Sunum: MVC, SignalR, Razor, konuşma paneli | Bll; Dal yalnızca kayıt ve Identity için |
+
+Çözüm dosyası: `Kivilcim.sln`. Visual Studio'da başlangıç projesi **Kivilcim** (Web) olmalı; F5 veritabanını oluşturur.
 
 ```
-Controllers/   Home (akış), Explore (keşfet, etiket, arama), Posts, Blog, Settings, Notifications, Messages
-Hubs/          NotificationHub (SignalR)
-Areas/Identity Türkçe giriş, kayıt ve hesap sayfaları
-Data/          ApplicationDbContext, Migrations (SQL Server), SeedData
-Models/        Entities.cs (veritabanı tabloları), ViewModels.cs
-Services/      PostQueryService (akış sorguları), ImageStore, yardımcılar
-Views/         Razor sayfaları, Shared/_PostCard.cshtml gönderi kartı
-wwwroot/       site.css, site.js, yüklenen görseller (uploads/)
+Kivilcim.sln
+src/Core/        Abstractions, Results, Realtime
+src/Model/       Entities.cs
+src/Bll/         Abstractions, Dtos, Services, Rules, Media, Utilities
+src/Dal/         Data (DbContext, Migrations, SeedData), Repositories, Storage, Email, Identity
+src/Web/         Controllers, Views, Hubs, Realtime, Helpers, Models, wwwroot, Areas/Identity
 ```
 
 ## Notlar

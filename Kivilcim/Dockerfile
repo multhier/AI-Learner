@@ -1,10 +1,10 @@
-# Kıvılcım: ASP.NET Core 8 MVC
+# Kıvılcım: ASP.NET Core 8 MVC (katmanlı çözüm: Core, Model, Bll, Dal, Web)
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY Kivilcim.csproj .
-RUN dotnet restore
-COPY . .
-RUN dotnet publish -c Release -o /app --no-restore
+COPY Kivilcim.sln ./
+COPY src/ ./src/
+RUN dotnet restore Kivilcim.sln
+RUN dotnet publish src/Web/Kivilcim.Web.csproj -c Release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app

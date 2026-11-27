@@ -1,0 +1,56 @@
+@model EditPostViewModel
+@{
+    ViewData["Title"] = "Gönderiyi düzenle";
+    ViewData["HideComposeFab"] = true;
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-7 col-xl-6">
+        <div class="card composer">
+            <div class="composer-head">
+                <span class="fw-semibold">Gönderiyi düzenle</span>
+                <a href="/post/@Model.Id" class="btn btn-sm btn-outline-secondary">Geri dön</a>
+            </div>
+
+            <form method="post" action="/post/@Model.Id/edit" id="editForm">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mx-3 mt-3 mb-0 py-2"></div>
+
+                <input asp-for="Title" class="composer-title" placeholder="Başlık" aria-label="Başlık" />
+                <span asp-validation-for="Title" class="text-danger small px-3"></span>
+
+                @if (Model.Type == PostType.Photo && Model.Images.Count > 0)
+                {
+                    <p class="photo-note mb-0">
+                        Bu gönderinin <strong>@Model.Images.Count</strong> resmi var. Resimleri değiştirmek için yeni bir gönderi oluşturun.
+                    </p>
+                }
+
+                @if (Model.Type == PostType.Link)
+                {
+                    <section class="px-3 pt-2">
+                        <input asp-for="LinkUrl" type="url" class="form-control form-control-lg" placeholder="https://..." aria-label="Bağlantı" />
+                        <span asp-validation-for="LinkUrl" class="text-danger small"></span>
+                    </section>
+                }
+
+                <textarea asp-for="Body" class="composer-body" rows="6" placeholder="Metin" aria-label="Metin"></textarea>
+                <span asp-validation-for="Body" class="text-danger small px-3"></span>
+
+                <div class="tag-editor" id="tagEditor">
+                    <input type="text" id="tagInput" class="tag-editor-input" placeholder="#etiket ekle" autocomplete="off" aria-label="Etiket ekle" />
+                </div>
+                <input asp-for="Tags" type="hidden" />
+
+                <div class="composer-foot">
+                    <a href="/post/@Model.Id" class="btn btn-outline-secondary">Vazgeç</a>
+                    <button type="submit" class="btn btn-spark px-4">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

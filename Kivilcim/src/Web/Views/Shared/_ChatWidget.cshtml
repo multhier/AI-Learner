@@ -1,0 +1,27 @@
+@* Sağ alttaki konuşma paneli. Girişli kullanıcılar için; mesajlar canlı (SignalR) güncellenir. *@
+<div class="chat-widget" id="chatWidget">
+    <button type="button" class="chat-launcher" id="chatLauncher" aria-expanded="false" aria-controls="chatPanel" aria-label="Mesajlar">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4.5 3.5V16H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" fill="currentColor"/></svg>
+        <span class="badge rounded-pill bg-danger chat-badge d-none" id="chatBadge">0</span>
+    </button>
+
+    <section class="chat-panel" id="chatPanel" aria-label="Konuşma paneli" hidden>
+        <header class="chat-panel-head">
+            <button type="button" class="chat-icon-btn" id="chatBack" aria-label="Konuşmalara dön" hidden>←</button>
+            <strong class="chat-panel-title" id="chatTitle">Mesajlar</strong>
+            <button type="button" class="chat-icon-btn" id="chatClose" aria-label="Paneli kapat">×</button>
+        </header>
+
+        <div class="chat-list" id="chatList">
+            <p class="chat-empty" id="chatListEmpty" hidden>Henüz konuşma yok. Bir blogdaki "Mesaj gönder" ile başla.</p>
+        </div>
+
+        <div class="chat-thread" id="chatThread" hidden>
+            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+            <form class="chat-compose" id="chatComposeForm" autocomplete="off">
+                <input type="text" id="chatComposeInput" class="form-control" maxlength="4000" placeholder="Mesaj yaz..." aria-label="Mesaj" />
+                <button type="submit" class="btn btn-spark btn-sm">Gönder</button>
+            </form>
+        </div>
+    </section>
+</div>

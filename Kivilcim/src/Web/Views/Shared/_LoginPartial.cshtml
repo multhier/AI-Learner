@@ -1,0 +1,58 @@
+@using Microsoft.AspNetCore.Identity
+@using Kivilcim.Bll.Abstractions
+@using Kivilcim.Model
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject IInboxService Inbox
+
+<ul class="navbar-nav align-items-md-center gap-md-2 ms-md-2">
+@if (SignInManager.IsSignedIn(User))
+{
+    var me = await UserManager.GetUserAsync(User);
+    var myId = me?.Id ?? "";
+    var counts = await Inbox.GetCountsAsync(myId);
+    <li class="nav-item">
+        <a class="nav-link nav-icon" href="/notifications" title="Bildirimler" aria-label="Bildirimler">
+            🔔<span class="badge rounded-pill bg-danger nav-badge @(counts.Notifications == 0 ? "d-none" : "")" id="notifBadge">@counts.Notifications</span>
+            <span class="d-md-none ms-1">Bildirimler</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link nav-icon" href="/messages" title="Mesajlar" aria-label="Mesajlar">
+            ✉<span class="badge rounded-pill bg-danger nav-badge @(counts.Messages == 0 ? "d-none" : "")" id="msgBadge">@counts.Messages</span>
+            <span class="d-md-none ms-1">Mesajlar</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="btn btn-spark btn-sm my-1" href="/new" data-bs-toggle="modal" data-bs-target="#composeModal" id="composeButton">+ Gönderi</a>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userMenu" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+            <partial name="_Avatar" model="@((me?.AvatarPath, me?.DisplayName ?? "?", 28))" />
+            <span class="d-md-none">@me?.DisplayName</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+            <li><a class="dropdown-item" href="/blog/@me?.BlogName">Blogum</a></li>
+            <li><a class="dropdown-item" href="/settings">Profil ayarları</a></li>
+            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">Hesap ve şifre</a></li>
+            <li><a class="dropdown-item" href="/okubeni">Beni oku</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button type="submit" class="dropdown-item">Çıkış yap</button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Giriş yap</a>
+    </li>
+    <li class="nav-item">
+        <a class="btn btn-spark btn-sm my-1" asp-area="Identity" asp-page="/Account/Register">Kaydol</a>
+    </li>
+}
+</ul>

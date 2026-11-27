@@ -28,10 +28,10 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
-      - name: Derle
-        run: dotnet build -c Release
+      - name: Derle (tüm katmanlar)
+        run: dotnet build Kivilcim.sln -c Release
       - name: Yayın paketi oluştur
-        run: dotnet publish -c Release -o ../publish --no-build
+        run: dotnet publish src/Web/Kivilcim.Web.csproj -c Release -o ../publish --no-build
       - name: SQL Server ile başlat ve sayfaları kontrol et
         env:
           ASPNETCORE_ENVIRONMENT: Development
